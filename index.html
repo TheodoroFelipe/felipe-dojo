@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#c8102e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Dojo">
+<title>武 SHOWCASE DOJO · Felipe</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+JP:wght@400;700;900&family=Shippori+Mincho:wght@400;700;900&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f5f1e8;
+    --bg-paper: #faf6ed;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-mute: #8a8a8a;
+    --line: #d9d2c1;
+    --accent: #c8102e;
+    --accent-deep: #8b0a1f;
+    --gold: #c9a227;
+    --indigo: #1d3557;
+    --sakura: #f7c5cc;
+    --matcha: #6b8e4e;
+    --shadow: 0 1px 0 rgba(26,26,26,.04), 0 8px 24px -8px rgba(26,26,26,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200,16,46,.05), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(29,53,87,.04), transparent 60%),
+      var(--bg);
+    min-height:100vh;
+    overflow-x:hidden;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' /></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>");
+    opacity:.06;mix-blend-mode:multiply;
+  }
+  .app{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:24px 28px 80px}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);margin-bottom:32px;flex-wrap:wrap;gap:16px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .hinomaru{
+    width:42px;height:42px;border-radius:50%;
+    background:radial-gradient(circle, var(--accent) 0%, var(--accent) 60%, var(--accent-deep) 100%);
+    box-shadow:0 0 0 4px var(--bg-paper), 0 0 0 5px var(--line), 0 6px 18px rgba(200,16,46,.35);
+    position:relative;flex:none;
+  }
+  .hinomaru::after{
+    content:"";position:absolute;inset:8px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.4), transparent 60%);
+  }
+  .brand-text .kanji{font-family:'Shippori Mincho',serif;font-weight:900;font-size:11px;letter-spacing:.4em;color:var(--accent);display:block;line-height:1}
+  .brand-text .title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.04em;line-height:1;margin-top:4px}
+  .brand-text .sub{font-size:11px;color:var(--ink-mute);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+
+  .header-stats{display:flex;gap:8px;flex-wrap:wrap}
+  .h-stat{
+    background:var(--bg-paper);border:1px solid var(--line);padding:8px 14px;border-radius:2px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .h-stat .lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
+  .h-stat .val{font-family:'Bebas Neue';font-size:22px;line-height:1;color:var(--ink)}
+  .h-stat.streak .val{color:var(--accent)}
+  .h-stat.lvl .val{color:var(--gold)}
+
+  .tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:32px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    background:none;border:none;padding:14px 18px;cursor:pointer;font-family:'Bebas Neue',sans-serif;
+    font-size:17px;letter-spacing:.08em;color:var(--ink-mute);position:relative;white-space:nowrap;
+    transition:color .2s;
+  }
+  .tab .jp{display:block;font-family:'Noto Serif JP';font-size:9px;letter-spacing:.3em;color:var(--ink-mute);margin-bottom:2px;font-weight:700}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--ink)}
+  .tab.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:-2px;height:4px;background:var(--accent);
+  }
+  .tab.active .jp{color:var(--accent)}
+
+  .panel{display:none;animation:fadeUp .4s ease}
+  .panel.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .grid{display:grid;gap:20px}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--bg-paper);border:1px solid var(--line);border-radius:3px;padding:24px;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+  .card-title{font-family:'Bebas Neue';font-size:22px;letter-spacing:.05em;line-height:1}
+  .card-jp{font-family:'Noto Serif JP';font-weight:700;font-size:10px;color:var(--accent);letter-spacing:.3em;display:block;margin-bottom:4px}
+  .card-sub{font-size:11px;color:var(--ink-mute);letter-spacing:.1em;text-transform:uppercase}
+
+  .hero{
+    background:
+      linear-gradient(135deg, rgba(250,246,237,.95), rgba(250,246,237,.92)),
+      repeating-linear-gradient(45deg, transparent 0 22px, rgba(200,16,46,.04) 22px 23px);
+    border:1px solid var(--line);border-left:4px solid var(--accent);
+    padding:32px 36px;border-radius:3px;margin-bottom:24px;position:relative;overflow:hidden;
+  }
+  .hero::before{
+    content:"道";position:absolute;right:-20px;top:-30px;font-family:'Noto Serif JP';
+    font-weight:900;font-size:240px;color:var(--accent);opacity:.04;line-height:1;pointer-events:none;
+  }
+  .hero h1{font-family:'Bebas Neue';font-size:48px;line-height:1;letter-spacing:.02em;margin-bottom:8px}
+  .hero .greet-jp{font-family:'Shippori Mincho';font-weight:900;color:var(--accent);font-size:14px;letter-spacing:.4em;margin-bottom:6px}
+  .hero p{color:var(--ink-soft);font-size:14px;max-width:520px;line-height:1.6}
+  .hero .quote{margin-top:16px;font-family:'Shippori Mincho';font-style:italic;color:var(--ink-mute);font-size:13px;border-top:1px dashed var(--line);padding-top:12px}
+
+  .stat-card{
+    background:var(--bg-paper);border:1px solid var(--line);border-radius:3px;padding:20px;
+    position:relative;overflow:hidden;
+  }
+  .stat-card .stat-jp{position:absolute;right:14px;top:14px;font-family:'Noto Serif JP';font-weight:900;font-size:32px;color:var(--accent);opacity:.12}
+  .stat-card .lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;margin-bottom:8px}
+  .stat-card .val{font-family:'Bebas Neue';font-size:48px;line-height:1;color:var(--ink)}
+  .stat-card .unit{font-size:12px;color:var(--ink-mute);margin-left:4px;font-family:'Inter'}
+  .stat-card .delta{font-size:11px;color:var(--matcha);margin-top:6px;font-weight:600}
+  .stat-card .delta.neg{color:var(--accent)}
+  .stat-card .progress{margin-top:12px;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+  .stat-card .progress span{display:block;height:100%;background:var(--accent);transition:width .6s}
+
+  .day-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+  .day-tab{
+    background:var(--bg-paper);border:1px solid var(--line);padding:10px 14px;cursor:pointer;
+    font-family:'Bebas Neue';font-size:14px;letter-spacing:.08em;border-radius:2px;
+    transition:all .2s;display:flex;flex-direction:column;align-items:center;min-width:72px;
+  }
+  .day-tab .jp{font-family:'Noto Serif JP';font-size:9px;color:var(--ink-mute);letter-spacing:.2em;font-weight:700}
+  .day-tab .num{font-size:16px;line-height:1;margin-top:2px}
+  .day-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .day-tab.active .jp{color:var(--accent)}
+  .day-tab.done::after{content:"✓";color:var(--matcha);font-size:14px;margin-left:6px}
+
+  .exercise{
+    background:var(--bg-paper);border:1px solid var(--line);border-radius:3px;
+    padding:18px 20px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+    transition:all .2s;
+  }
+  .exercise.done{background:#f0ebe0;border-color:#c8c0ad}
+  .exercise.done .ex-name{text-decoration:line-through;color:var(--ink-mute)}
+  .ex-name{font-family:'Bebas Neue';font-size:18px;letter-spacing:.04em;line-height:1.2;margin-bottom:4px}
+  .ex-meta{font-size:11px;color:var(--ink-mute);letter-spacing:.05em}
+  .ex-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .load-input{
+    width:70px;padding:8px 10px;border:1px solid var(--line);background:var(--bg);
+    font-family:'DM Mono';font-size:13px;text-align:center;border-radius:2px;
+  }
+  .load-input:focus{outline:none;border-color:var(--accent)}
+  .pr-badge{
+    background:var(--gold);color:#fff;font-size:9px;letter-spacing:.18em;padding:3px 6px;
+    border-radius:2px;font-weight:700;display:inline-flex;align-items:center;gap:3px;
+  }
+  .check-btn{
+    width:36px;height:36px;border:1.5px solid var(--ink);background:var(--bg-paper);cursor:pointer;
+    font-size:18px;border-radius:2px;transition:all .15s;
+  }
+  .check-btn:hover{background:var(--ink);color:#fff}
+  .exercise.done .check-btn{background:var(--matcha);color:#fff;border-color:var(--matcha)}
+
+  .training-summary{
+    margin-top:20px;padding:18px;border:1px dashed var(--line);background:rgba(250,246,237,.5);
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-radius:3px;
+  }
+  .training-summary .progress-ring{display:flex;align-items:center;gap:14px}
+  .ring{width:64px;height:64px}
+  .ring circle{fill:none;stroke-width:6}
+  .ring .bg{stroke:var(--line)}
+  .ring .fg{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .6s}
+
+  .meal{
+    background:var(--bg-paper);border:1px solid var(--line);border-radius:3px;padding:20px;margin-bottom:14px;
+    border-left:3px solid var(--matcha);transition:all .2s;
+  }
+  .meal.done{border-left-color:var(--gold);background:#f0ebe0}
+  .meal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+  .meal-title{font-family:'Bebas Neue';font-size:20px;letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .meal-title .num{
+    width:30px;height:30px;background:var(--matcha);color:#fff;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:14px;
+  }
+  .meal.done .meal-title .num{background:var(--gold)}
+  .meal-jp{font-family:'Shippori Mincho';font-weight:700;color:var(--ink-mute);font-size:11px;letter-spacing:.3em;margin-left:6px}
+  .food-list{list-style:none;font-size:13px;color:var(--ink-soft)}
+  .food-list li{padding:6px 0;border-bottom:1px dashed var(--line);display:flex;justify-content:space-between}
+  .food-list li:last-child{border-bottom:none}
+  .food-list .qty{font-family:'DM Mono';color:var(--ink);font-weight:500}
+  .meal-toggle{
+    background:var(--ink);color:#fff;border:none;padding:8px 14px;cursor:pointer;
+    font-family:'Bebas Neue';font-size:13px;letter-spacing:.1em;border-radius:2px;transition:all .15s;
+  }
+  .meal-toggle:hover{background:var(--accent)}
+  .meal.done .meal-toggle{background:var(--matcha)}
+  .option-tabs{display:flex;gap:4px;margin-bottom:10px}
+  .opt-btn{font-size:11px;padding:4px 10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;border-radius:2px;font-family:'DM Mono'}
+  .opt-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:18px}
+  .form-grid label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);margin-bottom:4px;font-weight:600}
+  .form-grid input{
+    width:100%;padding:10px 12px;border:1px solid var(--line);background:var(--bg-paper);
+    font-family:'DM Mono';font-size:14px;border-radius:2px;
+  }
+  .form-grid input:focus{outline:none;border-color:var(--accent)}
+  .btn-primary{
+    background:var(--accent);color:#fff;border:none;padding:12px 24px;cursor:pointer;
+    font-family:'Bebas Neue';font-size:15px;letter-spacing:.1em;border-radius:2px;
+    transition:background .15s;
+  }
+  .btn-primary:hover{background:var(--accent-deep)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-secondary{
+    background:transparent;color:var(--ink);border:1px solid var(--ink);padding:11px 22px;cursor:pointer;
+    font-family:'Bebas Neue';font-size:14px;letter-spacing:.1em;border-radius:2px;
+  }
+  .btn-secondary:hover{background:var(--ink);color:#fff}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+  canvas.chart{width:100%;height:220px;margin-top:8px}
+
+  .history-list{max-height:280px;overflow-y:auto;border:1px solid var(--line);background:var(--bg);border-radius:2px}
+  .history-list table{width:100%;border-collapse:collapse;font-size:12px;font-family:'DM Mono'}
+  .history-list th{position:sticky;top:0;background:var(--ink);color:#fff;padding:8px;text-align:left;font-weight:500;font-size:10px;letter-spacing:.15em}
+  .history-list td{padding:8px;border-top:1px solid var(--line)}
+  .history-list tr:hover td{background:var(--bg-paper)}
+
+  .achievements{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .achievement{
+    background:var(--bg-paper);border:1px solid var(--line);border-radius:3px;padding:18px;
+    text-align:center;position:relative;transition:all .25s;opacity:.4;filter:grayscale(1);
+  }
+  .achievement.unlocked{opacity:1;filter:none;border-color:var(--gold);box-shadow:0 0 0 1px var(--gold), var(--shadow)}
+  .achievement .icon{font-size:36px;display:block;margin-bottom:8px;line-height:1}
+  .achievement .name{font-family:'Bebas Neue';font-size:14px;letter-spacing:.06em;line-height:1.1;margin-bottom:4px}
+  .achievement .desc{font-size:10px;color:var(--ink-mute);line-height:1.4}
+  .achievement.unlocked::before{
+    content:"獲得";position:absolute;top:6px;right:8px;font-family:'Noto Serif JP';
+    font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.15em;
+  }
+
+  .toast-stack{position:fixed;top:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px;max-width:340px}
+  .toast{
+    background:var(--ink);color:#fff;padding:14px 18px;border-radius:3px;
+    border-left:4px solid var(--accent);box-shadow:0 12px 32px rgba(0,0,0,.25);
+    animation:slideIn .35s ease;font-size:13px;
+  }
+  .toast.gold{border-left-color:var(--gold)}
+  .toast.green{border-left-color:var(--matcha)}
+  .toast .t-jp{font-family:'Noto Serif JP';font-weight:700;color:var(--accent);font-size:10px;letter-spacing:.3em;display:block;margin-bottom:4px}
+  .toast.gold .t-jp{color:var(--gold)}
+  .toast.green .t-jp{color:var(--matcha)}
+  .toast .t-title{font-family:'Bebas Neue';font-size:16px;letter-spacing:.06em;margin-bottom:2px}
+  .toast .t-desc{font-size:12px;color:#d0d0d0;line-height:1.4}
+  @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:none;opacity:1}}
+
+  .week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+  .day-cell{
+    aspect-ratio:1;border:1px solid var(--line);background:var(--bg);border-radius:2px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;
+    color:var(--ink-mute);position:relative;
+  }
+  .day-cell .d-num{font-family:'Bebas Neue';font-size:16px;color:var(--ink);line-height:1}
+  .day-cell .d-jp{font-family:'Noto Serif JP';font-size:8px;font-weight:700;letter-spacing:.1em}
+  .day-cell.full{background:var(--accent);border-color:var(--accent)}
+  .day-cell.full .d-num,.day-cell.full .d-jp{color:#fff}
+  .day-cell.partial{background:var(--gold);border-color:var(--gold)}
+  .day-cell.partial .d-num,.day-cell.partial .d-jp{color:#fff}
+  .day-cell.today{box-shadow:0 0 0 2px var(--ink)}
+
+  .pr-list{list-style:none}
+  .pr-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .pr-item:last-child{border:none}
+  .pr-item .name{font-family:'Bebas Neue';font-size:15px;letter-spacing:.04em}
+  .pr-item .val{font-family:'DM Mono';color:var(--accent);font-weight:600}
+
+  .reset-zone{margin-top:40px;padding:20px;border:1px dashed var(--line);text-align:center;border-radius:3px}
+  .reset-zone p{font-size:12px;color:var(--ink-mute);margin-bottom:10px}
+  .btn-danger{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:8px 18px;cursor:pointer;font-family:'Bebas Neue';font-size:12px;letter-spacing:.12em;border-radius:2px}
+  .btn-danger:hover{background:var(--accent);color:#fff}
+
+  .footer{text-align:center;color:var(--ink-mute);font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
+  .footer .jp{font-family:'Shippori Mincho';font-weight:900;color:var(--accent);display:block;margin-bottom:6px;font-size:13px;letter-spacing:.4em}
+
+  /* COMPARTILHAR / SHARE */
+  .share-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+  .share-card{
+    background:var(--bg-paper);border:1px solid var(--line);border-radius:3px;padding:24px;
+    transition:transform .2s, box-shadow .2s;
+  }
+  .share-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .share-card .icon{font-size:36px;display:block;margin-bottom:10px;line-height:1}
+  .share-card h3{font-family:'Bebas Neue';font-size:20px;letter-spacing:.05em;margin-bottom:6px}
+  .share-card .jp{font-family:'Noto Serif JP';font-weight:700;font-size:10px;color:var(--accent);letter-spacing:.3em;margin-bottom:4px;display:block}
+  .share-card p{font-size:12px;color:var(--ink-soft);line-height:1.5;margin-bottom:14px}
+
+  .period-select{
+    display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;
+  }
+  .period-btn{
+    background:var(--bg);border:1px solid var(--line);padding:6px 12px;cursor:pointer;
+    font-family:'DM Mono';font-size:11px;border-radius:2px;letter-spacing:.05em;
+  }
+  .period-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .preview-zone{
+    margin-top:20px;border:1px dashed var(--line);padding:14px;background:var(--bg);
+    border-radius:3px;text-align:center;min-height:80px;
+  }
+  .preview-zone img{max-width:100%;max-height:400px;border:1px solid var(--line);border-radius:2px}
+  .preview-zone canvas{max-width:100%;border:1px solid var(--line);border-radius:2px}
+
+  .hidden{display:none !important}
+
+  /* CONFIG */
+  .config-row{
+    display:flex;justify-content:space-between;align-items:center;padding:14px 0;
+    border-bottom:1px solid var(--line);gap:14px;flex-wrap:wrap;
+  }
+  .config-row:last-child{border-bottom:none}
+  .config-row .label{flex:1;min-width:140px}
+  .config-row .label-title{font-family:'Bebas Neue';font-size:15px;letter-spacing:.05em}
+  .config-row .label-desc{font-size:11px;color:var(--ink-mute);margin-top:2px}
+  .time-input{
+    padding:6px 10px;border:1px solid var(--line);background:var(--bg-paper);
+    font-family:'DM Mono';font-size:13px;border-radius:2px;
+  }
+  /* Switch */
+  .switch{position:relative;display:inline-block;width:46px;height:24px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{
+    position:absolute;cursor:pointer;inset:0;background:var(--line);
+    transition:.2s;border-radius:24px;
+  }
+  .slider:before{
+    content:"";position:absolute;height:18px;width:18px;left:3px;bottom:3px;
+    background:#fff;transition:.2s;border-radius:50%;
+  }
+  input:checked + .slider{background:var(--accent)}
+  input:checked + .slider:before{transform:translateX(22px)}
+
+  /* INSTALL BANNER */
+  .install-banner{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:14px 20px;border-radius:4px;
+    box-shadow:0 12px 32px rgba(0,0,0,.3);display:flex;align-items:center;gap:14px;
+    z-index:90;font-size:13px;max-width:90vw;
+  }
+  .install-banner button{
+    background:var(--accent);color:#fff;border:none;padding:8px 16px;cursor:pointer;
+    font-family:'Bebas Neue';font-size:13px;letter-spacing:.08em;border-radius:2px;
+  }
+  .install-banner .close{background:transparent;color:#999;font-size:20px;padding:0 4px;cursor:pointer;border:none}
+
+  @media (max-width:600px){
+    .app{padding:16px}
+    .topbar{padding:8px 0 16px;margin-bottom:24px}
+    .brand-text .title{font-size:22px}
+    .h-stat{padding:6px 10px}
+    .h-stat .val{font-size:18px}
+    .hero{padding:24px}
+    .hero h1{font-size:32px}
+    .stat-card .val{font-size:36px}
+  }
+</style>
+</head>
+<body>
+
+<div class="toast-stack" id="toasts"></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="hinomaru"></div>
+      <div class="brand-text">
+        <span class="kanji">武 道 場</span>
+        <h1 class="title">SHOWCASE DOJO</h1>
+        <span class="sub">Felipe · Senshi Profile</span>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="h-stat lvl"><div><div class="lbl">Rank</div><div class="val" id="hRank">—</div></div></div>
+      <div class="h-stat"><div><div class="lbl">XP</div><div class="val" id="hXP">0</div></div></div>
+      <div class="h-stat streak"><div><div class="lbl">Streak</div><div class="val" id="hStreak">0🔥</div></div></div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="home"><span class="jp">本日</span>HOJE</button>
+    <button class="tab" data-tab="treino"><span class="jp">訓練</span>TREINO</button>
+    <button class="tab" data-tab="dieta"><span class="jp">食事</span>DIETA</button>
+    <button class="tab" data-tab="evolucao"><span class="jp">進化</span>EVOLUÇÃO</button>
+    <button class="tab" data-tab="conquistas"><span class="jp">勲章</span>CONQUISTAS</button>
+    <button class="tab" data-tab="compartilhar"><span class="jp">共有</span>COMPARTILHAR</button>
+    <button class="tab" data-tab="config"><span class="jp">設定</span>CONFIG</button>
+  </nav>
+
+  <!-- HOME -->
+  <section class="panel active" id="panel-home">
+    <div class="hero">
+      <div class="greet-jp" id="greetJP">お は よ う</div>
+      <h1 id="greetText">BOM DIA, FELIPE</h1>
+      <p>Cada série, cada refeição, cada gota de suor é um passo no caminho. <strong>O dojo está aberto.</strong> Foque na carga, no movimento e na constância. O resultado é consequência.</p>
+      <div class="quote">「 千里の道も一歩から 」 — Uma jornada de mil milhas começa com um único passo.</div>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:24px">
+      <div class="stat-card">
+        <span class="stat-jp">訓</span>
+        <div class="lbl">Treino Hoje</div>
+        <div class="val" id="sToday">0<span class="unit">/0</span></div>
+        <div class="progress"><span id="sTodayBar" style="width:0%"></span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-jp">食</span>
+        <div class="lbl">Refeições</div>
+        <div class="val" id="sMeals">0<span class="unit">/5</span></div>
+        <div class="progress"><span id="sMealsBar" style="width:0%"></span></div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-jp">体</span>
+        <div class="lbl">Peso atual</div>
+        <div class="val" id="sWeight">—<span class="unit">kg</span></div>
+        <div class="delta" id="sWeightDelta">—</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-jp">力</span>
+        <div class="lbl">PRs totais</div>
+        <div class="val" id="sPR">0</div>
+        <div class="delta">recordes pessoais</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div><span class="card-jp">週 間</span><h2 class="card-title">SEMANA ATUAL</h2></div>
+          <span class="card-sub" id="weekRange"></span>
+        </div>
+        <div class="week-strip" id="weekStrip"></div>
+        <p style="margin-top:14px;font-size:11px;color:var(--ink-mute);line-height:1.6">
+          <span style="display:inline-block;width:10px;height:10px;background:var(--accent);vertical-align:middle;margin-right:4px"></span> Treino + Dieta &nbsp;
+          <span style="display:inline-block;width:10px;height:10px;background:var(--gold);vertical-align:middle;margin:0 4px 0 8px"></span> Parcial
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><span class="card-jp">最 高 記 録</span><h2 class="card-title">TOP RECORDES</h2></div><span class="card-sub">Personal Best</span></div>
+        <ul class="pr-list" id="prList"><li style="color:var(--ink-mute);font-size:12px;padding:20px 0;text-align:center">Registre cargas no Treino para começar a marcar PRs.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TREINO -->
+  <section class="panel" id="panel-treino">
+    <div class="card-header" style="margin-bottom:20px">
+      <div>
+        <span class="card-jp">訓 練 計 画</span>
+        <h2 class="card-title">ROTINA DE 6 DIAS</h2>
+        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px;max-width:520px">Foque na CARGA e no movimento. Falhar com 8 reps = ÓTIMO. Passou de 10 = aumentar carga.</p>
+      </div>
+    </div>
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="exerciseList"></div>
+    <div class="training-summary">
+      <div class="progress-ring">
+        <svg class="ring" viewBox="0 0 64 64">
+          <circle class="bg" cx="32" cy="32" r="26"/>
+          <circle class="fg" id="trainRing" cx="32" cy="32" r="26" stroke-dasharray="163.36" stroke-dashoffset="163.36"/>
+        </svg>
+        <div>
+          <div style="font-family:'Bebas Neue';font-size:24px;line-height:1" id="trainPct">0%</div>
+          <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute)">Sessão Atual</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="finishTraining">⛩ ENCERRAR TREINO</button>
+    </div>
+  </section>
+
+  <!-- DIETA -->
+  <section class="panel" id="panel-dieta">
+    <div class="card-header" style="margin-bottom:20px">
+      <div>
+        <span class="card-jp">栄 養 計 画</span>
+        <h2 class="card-title">PLANO ALIMENTAR</h2>
+        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px">Sem glúten · sem lactose · foco em performance</p>
+      </div>
+      <button class="btn-secondary" id="resetMeals">🔄 ZERAR DIA</button>
+    </div>
+    <div id="mealsList"></div>
+  </section>
+
+  <!-- EVOLUÇÃO -->
+  <section class="panel" id="panel-evolucao">
+    <div class="card">
+      <div class="card-header"><div><span class="card-jp">体 重 測 定</span><h2 class="card-title">REGISTRO CORPORAL</h2></div></div>
+      <form id="bodyForm">
+        <div class="form-grid">
+          <div><label>Peso (kg)</label><input type="number" step="0.1" id="bWeight" required></div>
+          <div><label>Cintura (cm)</label><input type="number" step="0.1" id="bWaist"></div>
+          <div><label>Peito (cm)</label><input type="number" step="0.1" id="bChest"></div>
+          <div><label>Braço (cm)</label><input type="number" step="0.1" id="bArm"></div>
+          <div><label>Coxa (cm)</label><input type="number" step="0.1" id="bThigh"></div>
+        </div>
+        <button type="submit" class="btn-primary">📌 REGISTRAR</button>
+      </form>
+    </div>
+    <div class="grid grid-2" style="margin-top:20px">
+      <div class="card">
+        <div class="card-header"><div><span class="card-jp">体 重 推 移</span><h2 class="card-title">PESO AO LONGO DO TEMPO</h2></div></div>
+        <canvas class="chart" id="weightChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><span class="card-jp">記 録</span><h2 class="card-title">HISTÓRICO</h2></div></div>
+        <div class="history-list">
+          <table>
+            <thead><tr><th>DATA</th><th>PESO</th><th>CINTURA</th><th>PEITO</th><th>BRAÇO</th><th>COXA</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONQUISTAS -->
+  <section class="panel" id="panel-conquistas">
+    <div class="card-header" style="margin-bottom:20px">
+      <div>
+        <span class="card-jp">勲 章 の 殿 堂</span>
+        <h2 class="card-title">SALÃO DE MEDALHAS</h2>
+        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px">Conquiste medalhas completando objetivos no caminho do guerreiro.</p>
+      </div>
+    </div>
+    <div class="achievements" id="achievementsList"></div>
+    <div class="reset-zone">
+      <p>Zona crítica · resetar todos os dados</p>
+      <button class="btn-danger" id="hardReset">⚠ RESETAR TUDO</button>
+    </div>
+  </section>
+
+  <!-- COMPARTILHAR -->
+  <section class="panel" id="panel-compartilhar">
+    <div class="card-header" style="margin-bottom:20px">
+      <div>
+        <span class="card-jp">共 有</span>
+        <h2 class="card-title">COMPARTILHAR & EXPORTAR</h2>
+        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px;max-width:560px">Gere relatórios para o treinador, cards visuais para redes sociais e backups dos seus dados. Tudo offline, direto no app.</p>
+      </div>
+    </div>
+
+    <!-- Card export JSON -->
+    <div class="card" style="margin-bottom:18px">
+      <span class="card-jp">記 録 出 力</span>
+      <h3 class="card-title" style="margin-bottom:6px">📦 EXPORTAR JSON · BACKUP</h3>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">Baixe seus dados em formato JSON. Use para backup, migração entre dispositivos ou enviar para o treinador.</p>
+
+      <label style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;display:block;margin-bottom:8px">PERÍODO</label>
+      <div class="period-select" id="exportPeriod">
+        <button class="period-btn active" data-p="all">📚 Tudo</button>
+        <button class="period-btn" data-p="week">📅 Esta semana</button>
+        <button class="period-btn" data-p="month">🗓️ Este mês</button>
+        <button class="period-btn" data-p="last7">⏱ Últimos 7 dias</button>
+        <button class="period-btn" data-p="last30">⏱ Últimos 30 dias</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="downloadJson">⬇ BAIXAR JSON</button>
+        <button class="btn-secondary" id="shareJson">📤 COMPARTILHAR</button>
+      </div>
+    </div>
+
+    <!-- Card import JSON -->
+    <div class="card" style="margin-bottom:18px">
+      <span class="card-jp">取 込 み</span>
+      <h3 class="card-title" style="margin-bottom:6px">📥 IMPORTAR JSON · RESTAURAR</h3>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">Carregue um arquivo JSON exportado anteriormente para restaurar ou mesclar dados. <strong>Atenção:</strong> escolha o modo correto.</p>
+
+      <div class="period-select">
+        <button class="period-btn active" data-mode="merge" id="modeMerge">🔀 Mesclar (recomendado)</button>
+        <button class="period-btn" data-mode="replace" id="modeReplace">⚠ Substituir tudo</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-mute);margin-bottom:14px" id="importModeDesc">
+        <strong>Mesclar:</strong> mantém dados atuais, adiciona/atualiza com o JSON (PRs maiores prevalecem).
+      </p>
+
+      <input type="file" id="jsonFile" accept=".json,application/json" style="display:none">
+      <div class="btn-row">
+        <button class="btn-primary" id="pickJson">📂 ESCOLHER ARQUIVO</button>
+      </div>
+    </div>
+
+    <!-- Card relatório semanal/mensal -->
+    <div class="card" style="margin-bottom:18px">
+      <span class="card-jp">週 報 ・ 月 報</span>
+      <h3 class="card-title" style="margin-bottom:6px">📊 RELATÓRIO PARA TREINADOR</h3>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">Texto formatado pronto para enviar no WhatsApp/Email com resumo do período.</p>
+
+      <div class="period-select">
+        <button class="period-btn active" data-rep="week">📅 Semanal</button>
+        <button class="period-btn" data-rep="month">🗓️ Mensal</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="genReport">📝 GERAR RELATÓRIO</button>
+        <button class="btn-secondary" id="copyReport">📋 COPIAR</button>
+        <button class="btn-secondary" id="shareReport">📤 COMPARTILHAR</button>
+      </div>
+
+      <div class="preview-zone hidden" id="reportPreview">
+        <textarea id="reportText" style="width:100%;min-height:220px;padding:14px;border:none;background:transparent;font-family:'DM Mono';font-size:12px;line-height:1.6;resize:vertical" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Card image PNG -->
+    <div class="card">
+      <span class="card-jp">画 像</span>
+      <h3 class="card-title" style="margin-bottom:6px">🎴 CARD VISUAL · INSTAGRAM/STORIES</h3>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">Imagem com seu progresso pra postar no feed ou stories.</p>
+
+      <label style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;display:block;margin-bottom:8px">FORMATO</label>
+      <div class="period-select" id="cardFormat">
+        <button class="period-btn active" data-fmt="square">⬛ Quadrado 1:1 (Feed)</button>
+        <button class="period-btn" data-fmt="story">📱 Stories 9:16</button>
+      </div>
+
+      <label style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;display:block;margin-bottom:8px">CONTEÚDO</label>
+      <div class="period-select" id="cardContent">
+        <button class="period-btn active" data-c="weekly">Resumo semanal</button>
+        <button class="period-btn" data-c="monthly">Resumo mensal</button>
+        <button class="period-btn" data-c="prs">Top PRs</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="genCard">🎨 GERAR CARD</button>
+        <button class="btn-secondary" id="downloadCard" disabled>⬇ BAIXAR PNG</button>
+        <button class="btn-secondary" id="shareCard" disabled>📤 COMPARTILHAR</button>
+      </div>
+
+      <div class="preview-zone hidden" id="cardPreview">
+        <canvas id="cardCanvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="panel" id="panel-config">
+    <div class="card-header" style="margin-bottom:20px">
+      <div>
+        <span class="card-jp">設 定</span>
+        <h2 class="card-title">CONFIGURAÇÕES</h2>
+        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px">Personalize lembretes e instale o app no dispositivo.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <span class="card-jp">通 知</span>
+      <h3 class="card-title" style="margin-bottom:14px">🔔 LEMBRETES</h3>
+
+      <div id="notifStatus" style="padding:10px;background:var(--bg);border:1px dashed var(--line);border-radius:2px;margin-bottom:18px;font-size:12px"></div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">⛩ TREINO</div>
+          <div class="label-desc">Lembrete diário no horário escolhido</div>
+        </div>
+        <input type="time" class="time-input" id="notifTrain" value="18:00">
+        <label class="switch"><input type="checkbox" id="notifTrainOn"><span class="slider"></span></label>
+      </div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">🍙 CAFÉ DA MANHÃ</div>
+          <div class="label-desc">Refeição 1</div>
+        </div>
+        <input type="time" class="time-input" id="notifMeal1" value="07:30">
+        <label class="switch"><input type="checkbox" id="notifMeal1On"><span class="slider"></span></label>
+      </div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">🍱 ALMOÇO</div>
+          <div class="label-desc">Refeição 2</div>
+        </div>
+        <input type="time" class="time-input" id="notifMeal2" value="12:30">
+        <label class="switch"><input type="checkbox" id="notifMeal2On"><span class="slider"></span></label>
+      </div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">⚡ PRÉ-TREINO</div>
+          <div class="label-desc">Refeição 3</div>
+        </div>
+        <input type="time" class="time-input" id="notifMeal3" value="16:00">
+        <label class="switch"><input type="checkbox" id="notifMeal3On"><span class="slider"></span></label>
+      </div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">🍽 JANTAR</div>
+          <div class="label-desc">Refeição 4</div>
+        </div>
+        <input type="time" class="time-input" id="notifMeal4" value="20:00">
+        <label class="switch"><input type="checkbox" id="notifMeal4On"><span class="slider"></span></label>
+      </div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">🌙 CEIA</div>
+          <div class="label-desc">Refeição 5</div>
+        </div>
+        <input type="time" class="time-input" id="notifMeal5" value="22:30">
+        <label class="switch"><input type="checkbox" id="notifMeal5On"><span class="slider"></span></label>
+      </div>
+
+      <div class="config-row">
+        <div class="label">
+          <div class="label-title">⚖ PESAGEM SEMANAL</div>
+          <div class="label-desc">Domingo de manhã</div>
+        </div>
+        <input type="time" class="time-input" id="notifWeigh" value="08:00">
+        <label class="switch"><input type="checkbox" id="notifWeighOn"><span class="slider"></span></label>
+      </div>
+
+      <p style="font-size:11px;color:var(--ink-mute);margin-top:14px;line-height:1.5">
+        <strong>Como funciona:</strong> os lembretes só disparam quando o app está aberto ou foi aberto recentemente (porque é PWA sem servidor). Para lembretes garantidos sempre, use também o app Lembretes/Alarmes nativo do celular como backup.
+      </p>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <span class="card-jp">設 置</span>
+      <h3 class="card-title" style="margin-bottom:6px">📲 INSTALAR NO DISPOSITIVO</h3>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">Adicione o Dojo à tela inicial para abrir como aplicativo nativo.</p>
+      <div id="installInstructions" style="font-size:12px;color:var(--ink-soft);line-height:1.6"></div>
+      <button class="btn-primary hidden" id="installBtn" style="margin-top:14px">📲 INSTALAR APP</button>
+    </div>
+
+    <div class="card">
+      <span class="card-jp">情 報</span>
+      <h3 class="card-title" style="margin-bottom:6px">ℹ SOBRE</h3>
+      <p style="font-size:12px;color:var(--ink-soft);line-height:1.6">
+        <strong>Showcase Dojo</strong> v1.1<br>
+        App gamificado de treino e dieta com tema dojo japonês.<br>
+        Felipe · XSHOWCASE TEAM<br>
+        <span style="color:var(--ink-mute)">Funciona 100% offline · Dados salvos localmente</span>
+      </p>
+    </div>
+  </section>
+
+  <div class="footer">
+    <span class="jp">道 場</span>
+    Showcase Dojo · Felipe · v1.1 PWA
+  </div>
+</div>
+
+<!-- Install banner -->
+<div class="install-banner hidden" id="installBanner">
+  <span>📲 Instalar Dojo como app?</span>
+  <button id="installBannerBtn">INSTALAR</button>
+  <button class="close" id="installClose">×</button>
+</div>
+
+<script>
+/* ============ DATA MODEL ============ */
+const TRAINING = [
+  { day: 1, jp:"胸", title:"PEITO", exercises:["Supino inclinado halter","Supino reto guiado/máquina","Supino declinado / Cross declinado","Crossover / Peck deck"]},
+  { day: 2, jp:"背", title:"COSTAS + BÍCEPS", exercises:["Barra fixa","Remada baixa máquina","Rosca direta barra","Rosca alternada halter"]},
+  { day: 3, jp:"脚", title:"PERNAS (QUADRÍCEPS)", exercises:["Hack squat","Leg press","Cadeira extensora","Cadeira abdutora"]},
+  { day: 4, jp:"肩", title:"OMBROS + TRÍCEPS", exercises:["Desenvolvimento máquina/halter","Elevação lateral","Tríceps francês na polia","Tríceps banco"]},
+  { day: 5, jp:"背", title:"COSTAS + BÍCEPS II", exercises:["Remada cavalinho (T-bar)","Pull down com corda","Face pull","Rosca Scott máquina articulada"]},
+  { day: 6, jp:"脚", title:"PERNAS (POSTERIOR)", exercises:["Sumo terra bailarina","Mesa flexora","Cadeira flexora","Panturrilha pé/leg press","Cadeira adutora"]}
+];
+
+const MEALS = [
+  { id:1, title:"CAFÉ DA MANHÃ", jp:"朝食", items:[
+    {name:"Ovos inteiros", qty:"2 unid"},{name:"Claras", qty:"3 unid"},{name:"Tapioca", qty:"80g"},{name:"Banana", qty:"1 unid"},{name:"Morangos / Mamão", qty:"1 porção"}
+  ]},
+  { id:2, title:"ALMOÇO", jp:"昼食", items:[
+    {name:"Arroz branco", qty:"150g"},{name:"Feijão", qty:"100g"},{name:"Peito de frango", qty:"180g"},{name:"Legumes cozidos", qty:"à vontade"},{name:"Salada crua", qty:"à vontade"}
+  ]},
+  { id:3, title:"PRÉ / PÓS-TREINO", jp:"運動食", options:[
+    { label:"Opção 1", items:[{name:"Arroz branco", qty:"150g"},{name:"Whey vegetal", qty:"30g"},{name:"Banana / Manga", qty:"1 unid"}]},
+    { label:"Opção 2", items:[{name:"Pão sem glúten", qty:"3 fatias"},{name:"Frango desfiado", qty:"100g"},{name:"Mel", qty:"1 colher"},{name:"Fruta", qty:"1 unid"}]}
+  ]},
+  { id:4, title:"JANTAR", jp:"夕食", items:[
+    {name:"Arroz branco", qty:"150g"},{name:"Tilápia / Frango", qty:"180-200g"},{name:"Legumes", qty:"à vontade"},{name:"Salada", qty:"à vontade"}
+  ]},
+  { id:5, title:"CEIA", jp:"夜食", items:[
+    {name:"Ovos inteiros", qty:"2 unid"},{name:"Claras", qty:"2 unid"},{name:"Fruta", qty:"1 unid"},{name:"Castanhas", qty:"10g"}
+  ]}
+];
+
+const ACHIEVEMENTS = [
+  {id:"first_train", icon:"⛩", name:"PRIMEIRO PASSO",   desc:"Completou seu 1º treino",          check:s=>s.totalSessions>=1},
+  {id:"first_meal",  icon:"🍙", name:"OMUSUBI",          desc:"Marcou sua 1ª refeição",           check:s=>s.totalMeals>=1},
+  {id:"first_pr",    icon:"🥋", name:"NOVO RECORDE",     desc:"Bateu seu 1º PR",                  check:s=>Object.keys(s.PRs||{}).length>=1},
+  {id:"week_3",      icon:"🎌", name:"3 DIAS DE FOGO",   desc:"3 dias seguidos completos",        check:s=>s.bestStreak>=3},
+  {id:"week_7",      icon:"🏯", name:"SAMURAI SEMANAL",  desc:"7 dias seguidos completos",        check:s=>s.bestStreak>=7},
+  {id:"trains_10",   icon:"⚔",  name:"10 TREINOS",       desc:"Completou 10 sessões",             check:s=>s.totalSessions>=10},
+  {id:"trains_30",   icon:"🐉", name:"30 TREINOS",       desc:"Completou 30 sessões",             check:s=>s.totalSessions>=30},
+  {id:"meals_50",    icon:"🍱", name:"BENTO MASTER",     desc:"50 refeições registradas",         check:s=>s.totalMeals>=50},
+  {id:"weight_log",  icon:"⚖", name:"DISCIPLINA",       desc:"5+ pesagens registradas",          check:s=>(s.history||[]).length>=5},
+  {id:"prs_5",       icon:"🌸", name:"FLORESCER",        desc:"5 PRs diferentes",                 check:s=>Object.keys(s.PRs||{}).length>=5},
+  {id:"prs_15",      icon:"⚜", name:"MESTRE DO FERRO",  desc:"15 PRs diferentes",                check:s=>Object.keys(s.PRs||{}).length>=15},
+  {id:"perfect_day", icon:"🎴", name:"DIA PERFEITO",     desc:"Treino + 5 refeições no mesmo dia",check:s=>s.perfectDays>=1},
+];
+
+const RANKS = [
+  {min:0,    name:"白 帯",  ptbr:"FAIXA BRANCA"},
+  {min:200,  name:"黄 帯",  ptbr:"FAIXA AMARELA"},
+  {min:500,  name:"緑 帯",  ptbr:"FAIXA VERDE"},
+  {min:1000, name:"青 帯",  ptbr:"FAIXA AZUL"},
+  {min:2000, name:"茶 帯",  ptbr:"FAIXA MARROM"},
+  {min:3500, name:"黒 帯",  ptbr:"FAIXA PRETA"},
+  {min:6000, name:"師 範",  ptbr:"SHIHAN"},
+];
+function currentRank(xp){ let r = RANKS[0]; for(const k of RANKS){ if(xp>=k.min) r=k; } return r; }
+
+/* ============ STATE ============ */
+const KEY = "felipe_dojo_v1";
+const defaultState = {
+  PRs: {}, loads: {}, daySessions: {}, mealsByDay: {}, history: [],
+  totalSessions: 0, totalMeals: 0, perfectDays: 0,
+  bestStreak: 0, currentStreak: 0, lastFullDay: null, lastStreakDay: null,
+  unlocked: [], xp: 0, selectedDay: 1, mealOption: {},
+  notifications: {
+    train: { on:false, time:"18:00" },
+    meal1: { on:false, time:"07:30" },
+    meal2: { on:false, time:"12:30" },
+    meal3: { on:false, time:"16:00" },
+    meal4: { on:false, time:"20:00" },
+    meal5: { on:false, time:"22:30" },
+    weigh: { on:false, time:"08:00" },
+    lastFired: {}
+  }
+};
+let S = load();
+
+function load(){
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) || "{}");
+    const merged = Object.assign({}, defaultState, raw);
+    if (raw.notifications) merged.notifications = Object.assign({}, defaultState.notifications, raw.notifications);
+    return merged;
+  } catch(e){ return JSON.parse(JSON.stringify(defaultState)); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function fmtDate(s){ const d=new Date(s+"T12:00:00"); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
+function fmtDateLong(s){ const d=new Date(s+"T12:00:00"); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); }
+
+/* ============ TOASTS ============ */
+function toast(title, desc, kind="default"){
+  const stack = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind==="pr"?"gold":kind==="ok"?"green":"");
+  const jpMap = {pr:"記 録 更 新", ok:"達 成", default:"通 知"};
+  t.innerHTML = `<span class="t-jp">${jpMap[kind]||jpMap.default}</span><div class="t-title">${title}</div><div class="t-desc">${desc}</div>`;
+  stack.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(120%)';t.style.transition='all .3s';},3500);
+  setTimeout(()=>t.remove(),3900);
+}
+
+/* ============ HEADER ============ */
+function refreshHeader(){
+  document.getElementById('hXP').textContent = S.xp;
+  document.getElementById('hStreak').textContent = (S.currentStreak||0) + "🔥";
+  const r = currentRank(S.xp);
+  document.getElementById('hRank').innerHTML = r.name;
+}
+
+/* ============ HOME ============ */
+function buildHome(){
+  const hr = new Date().getHours();
+  let g="BOA NOITE", jp="こ ん ば ん は";
+  if(hr<12){g="BOM DIA";jp="お は よ う";}
+  else if(hr<18){g="BOA TARDE";jp="こ ん に ち は";}
+  document.getElementById('greetText').textContent = g + ", FELIPE";
+  document.getElementById('greetJP').textContent = jp;
+
+  const t = todayStr();
+  const session = S.daySessions[t];
+  const dayDef = session ? TRAINING.find(x=>x.day===session.day) : TRAINING.find(x=>x.day===S.selectedDay);
+  const totalEx = dayDef?.exercises.length || 0;
+  const doneEx = session ? Object.values(session.exercises||{}).filter(Boolean).length : 0;
+  document.getElementById('sToday').innerHTML = doneEx+`<span class="unit">/${totalEx}</span>`;
+  document.getElementById('sTodayBar').style.width = (totalEx?(doneEx/totalEx*100):0)+"%";
+
+  const meals = S.mealsByDay[t] || {};
+  const mealsDone = Object.keys(meals).length;
+  document.getElementById('sMeals').innerHTML = mealsDone+`<span class="unit">/5</span>`;
+  document.getElementById('sMealsBar').style.width = (mealsDone/5*100)+"%";
+
+  const last = S.history[S.history.length-1];
+  const prev = S.history[S.history.length-2];
+  document.getElementById('sWeight').innerHTML = last ? last.weight+`<span class="unit">kg</span>` : `—<span class="unit">kg</span>`;
+  if(last && prev){
+    const d = (last.weight - prev.weight).toFixed(1);
+    const el = document.getElementById('sWeightDelta');
+    el.textContent = (d>0?"+":"") + d + " kg desde último";
+    el.classList.toggle('neg', d>0);
+  }
+
+  document.getElementById('sPR').textContent = Object.keys(S.PRs).length;
+  buildWeekStrip();
+  buildPRList();
+}
+
+function buildWeekStrip(){
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = "";
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today); monday.setDate(today.getDate() - ((dow+6)%7));
+  const labels = ['月','火','水','木','金','土','日'];
+  const range = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const ds = d.toISOString().slice(0,10);
+    const session = S.daySessions[ds];
+    const meals = S.mealsByDay[ds] || {};
+    const tDone = session && session.finished;
+    const mDone = Object.keys(meals).length>=5;
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    if(tDone && mDone) cell.classList.add('full');
+    else if(tDone || mDone) cell.classList.add('partial');
+    if(ds===todayStr()) cell.classList.add('today');
+    cell.innerHTML = `<span class="d-jp">${labels[i]}</span><span class="d-num">${d.getDate()}</span>`;
+    strip.appendChild(cell);
+    range.push(d);
+  }
+  document.getElementById('weekRange').textContent =
+    range[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) + " — " +
+    range[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+
+function buildPRList(){
+  const list = document.getElementById('prList');
+  const entries = Object.entries(S.PRs).sort((a,b)=>b[1].weight - a[1].weight).slice(0,6);
+  if(!entries.length){
+    list.innerHTML = `<li style="color:var(--ink-mute);font-size:12px;padding:20px 0;text-align:center">Registre cargas no Treino para começar a marcar PRs.</li>`;
+    return;
+  }
+  list.innerHTML = entries.map(([name,pr])=>`
+    <li class="pr-item">
+      <div><div class="name">${name}</div><div style="font-size:10px;color:var(--ink-mute);margin-top:2px">${fmtDate(pr.date)}</div></div>
+      <div class="val">${pr.weight} kg</div>
+    </li>`).join('');
+}
+
+/* ============ TREINO ============ */
+function buildDayTabs(){
+  const c = document.getElementById('dayTabs');
+  c.innerHTML = "";
+  TRAINING.forEach(d=>{
+    const b = document.createElement('button');
+    b.className = 'day-tab' + (S.selectedDay===d.day ? ' active' : '');
+    const t = todayStr();
+    const session = S.daySessions[t];
+    if(session && session.day===d.day && session.finished) b.classList.add('done');
+    b.innerHTML = `<span class="jp">${d.jp}・DIA</span><span class="num">${d.day}</span>`;
+    b.onclick = ()=>{ S.selectedDay=d.day; save(); buildDayTabs(); buildExercises(); };
+    c.appendChild(b);
+  });
+}
+
+function buildExercises(){
+  const day = TRAINING.find(x=>x.day===S.selectedDay);
+  const list = document.getElementById('exerciseList');
+  const t = todayStr();
+  if(!S.daySessions[t]) S.daySessions[t] = { day: S.selectedDay, exercises:{}, finished:false };
+  if(S.daySessions[t].day !== S.selectedDay){
+    S.daySessions[t] = { day: S.selectedDay, exercises:{}, finished:false };
+  }
+  const session = S.daySessions[t];
+
+  list.innerHTML = `
+    <div class="card-header" style="margin-bottom:12px">
+      <div><span class="card-jp">${day.jp}</span><h3 class="card-title">DIA ${day.day} · ${day.title}</h3></div>
+    </div>
+  ` + day.exercises.map(name=>{
+    const done = !!session.exercises[name];
+    const load = S.loads[name] || "";
+    const pr = S.PRs[name];
+    return `
+      <div class="exercise ${done?'done':''}" data-ex="${name}">
+        <div class="ex-info">
+          <div class="ex-name">${name} ${pr?`<span class="pr-badge">PR ${pr.weight}kg</span>`:""}</div>
+          <div class="ex-meta">4 séries · 8–10 reps · falhar com 8 = ÓTIMO</div>
+        </div>
+        <div class="ex-controls">
+          <input type="number" class="load-input" placeholder="kg" value="${load}" data-load="${name}">
+          <button class="check-btn" data-check="${name}">${done?"✓":""}</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-load]').forEach(inp=>{
+    inp.addEventListener('change',e=>{
+      const name = e.target.dataset.load;
+      const v = parseFloat(e.target.value);
+      if(!isNaN(v) && v>0){
+        S.loads[name] = v;
+        const cur = S.PRs[name];
+        if(!cur || v > cur.weight){
+          S.PRs[name] = { weight:v, date: todayStr() };
+          S.xp += 25;
+          toast("PR! "+name, `Novo recorde: ${v} kg (+25 XP)`, "pr");
+        }
+        save(); refreshHeader(); buildExercises(); checkAchievements(); buildHome();
+      }
+    });
+  });
+  list.querySelectorAll('[data-check]').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      const name = e.currentTarget.dataset.check;
+      session.exercises[name] = !session.exercises[name];
+      save(); buildExercises(); updateRing(); buildHome();
+    });
+  });
+  updateRing();
+}
+
+function updateRing(){
+  const t = todayStr();
+  const session = S.daySessions[t];
+  const day = TRAINING.find(x=>x.day===(session?.day || S.selectedDay));
+  const total = day.exercises.length;
+  const done = session ? Object.values(session.exercises||{}).filter(Boolean).length : 0;
+  const pct = total ? done/total : 0;
+  const C = 2*Math.PI*26;
+  document.getElementById('trainRing').setAttribute('stroke-dashoffset', C - C*pct);
+  document.getElementById('trainPct').textContent = Math.round(pct*100)+"%";
+}
+
+document.getElementById('finishTraining').addEventListener('click',()=>{
+  const t = todayStr();
+  const session = S.daySessions[t];
+  if(!session){ toast("Sem sessão", "Marque exercícios primeiro."); return; }
+  const day = TRAINING.find(x=>x.day===session.day);
+  const done = Object.values(session.exercises||{}).filter(Boolean).length;
+  if(done < day.exercises.length){
+    if(!confirm(`Você completou ${done}/${day.exercises.length}. Encerrar mesmo assim?`)) return;
+  }
+  if(session.finished){ toast("Já encerrado","Esse treino já foi encerrado hoje."); return;}
+  session.finished = true;
+  S.totalSessions++;
+  S.xp += 50 + done*10;
+  toast("TREINO ENCERRADO", `+${50+done*10} XP · ${done} exercícios`, "ok");
+  updateStreak();
+  save(); refreshHeader(); buildHome(); buildDayTabs(); checkAchievements();
+});
+
+/* ============ DIETA ============ */
+function buildMeals(){
+  const list = document.getElementById('mealsList');
+  const t = todayStr();
+  if(!S.mealsByDay[t]) S.mealsByDay[t] = {};
+  const meals = S.mealsByDay[t];
+
+  list.innerHTML = MEALS.map(m=>{
+    const done = !!meals[m.id];
+    let body = "";
+    if(m.options){
+      const optKey = `${t}-${m.id}`;
+      const cur = S.mealOption[optKey] || "0";
+      body = `<div class="option-tabs">${m.options.map((o,i)=>`<button class="opt-btn ${cur==i?'active':''}" data-opt="${m.id}" data-i="${i}">${o.label}</button>`).join('')}</div>
+      <ul class="food-list">${m.options[cur].items.map(it=>`<li>${it.name}<span class="qty">${it.qty}</span></li>`).join('')}</ul>`;
+    } else {
+      body = `<ul class="food-list">${m.items.map(it=>`<li>${it.name}<span class="qty">${it.qty}</span></li>`).join('')}</ul>`;
+    }
+    return `<div class="meal ${done?'done':''}">
+      <div class="meal-head">
+        <div class="meal-title"><span class="num">${m.id}</span>${m.title}<span class="meal-jp">${m.jp}</span></div>
+        <button class="meal-toggle" data-meal="${m.id}">${done?"✓ FEITA":"MARCAR"}</button>
+      </div>
+      ${body}
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-meal]').forEach(b=>{
+    b.addEventListener('click',e=>{
+      const id = +e.currentTarget.dataset.meal;
+      if(meals[id]){ delete meals[id]; }
+      else { meals[id]=true; S.totalMeals++; S.xp+=10; toast("Refeição marcada","+10 XP","ok"); }
+      save(); refreshHeader(); buildMeals(); buildHome(); checkPerfectDay(); checkAchievements();
+    });
+  });
+  list.querySelectorAll('[data-opt]').forEach(b=>{
+    b.addEventListener('click',e=>{
+      const id = e.currentTarget.dataset.opt;
+      const i = e.currentTarget.dataset.i;
+      S.mealOption[`${t}-${id}`] = i;
+      save(); buildMeals();
+    });
+  });
+}
+
+document.getElementById('resetMeals').addEventListener('click',()=>{
+  if(!confirm("Zerar refeições de hoje?")) return;
+  const t = todayStr(); S.mealsByDay[t] = {}; save(); buildMeals(); buildHome();
+});
+
+function checkPerfectDay(){
+  const t = todayStr();
+  const session = S.daySessions[t];
+  const meals = S.mealsByDay[t] || {};
+  if(session?.finished && Object.keys(meals).length>=5){
+    if(S.lastFullDay !== t){
+      S.lastFullDay = t;
+      S.perfectDays++;
+      S.xp += 30;
+      toast("DIA PERFEITO 🎴","Treino + 5 refeições · +30 XP","pr");
+    }
+  }
+}
+
+function updateStreak(){
+  const t = todayStr();
+  const yest = new Date(); yest.setDate(yest.getDate()-1);
+  const ys = yest.toISOString().slice(0,10);
+  if(S.lastStreakDay === t) return;
+  if(S.lastStreakDay === ys) S.currentStreak = (S.currentStreak||0)+1;
+  else S.currentStreak = 1;
+  S.lastStreakDay = t;
+  if(S.currentStreak > (S.bestStreak||0)) S.bestStreak = S.currentStreak;
+}
+
+/* ============ EVOLUÇÃO ============ */
+document.getElementById('bodyForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const entry = {
+    date: todayStr(),
+    weight: parseFloat(document.getElementById('bWeight').value),
+    waist:  parseFloat(document.getElementById('bWaist').value)||null,
+    chest:  parseFloat(document.getElementById('bChest').value)||null,
+    arm:    parseFloat(document.getElementById('bArm').value)||null,
+    thigh:  parseFloat(document.getElementById('bThigh').value)||null,
+  };
+  S.history.push(entry); S.xp += 15;
+  save(); refreshHeader(); buildHistory(); buildChart(); buildHome(); checkAchievements();
+  toast("Registro salvo","+15 XP · evolução marcada","ok");
+  e.target.reset();
+});
+
+function buildHistory(){
+  const tb = document.getElementById('historyBody');
+  if(!S.history.length){ tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--ink-mute);padding:20px">Nenhum registro ainda</td></tr>`; return; }
+  tb.innerHTML = S.history.slice().reverse().map(h=>`
+    <tr><td>${fmtDate(h.date)}</td><td><strong>${h.weight}</strong></td><td>${h.waist??'—'}</td><td>${h.chest??'—'}</td><td>${h.arm??'—'}</td><td>${h.thigh??'—'}</td></tr>`).join('');
+}
+
+function buildChart(){
+  const c = document.getElementById('weightChart');
+  const ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio||1;
+  const w = c.clientWidth, h = 220;
+  c.width = w*dpr; c.height = h*dpr; ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+
+  const data = S.history.slice(-30);
+  if(data.length<1){
+    ctx.fillStyle="#8a8a8a"; ctx.font="12px Inter"; ctx.textAlign="center";
+    ctx.fillText("Registre seu peso para ver o gráfico", w/2, h/2);
+    return;
+  }
+  const pad = {l:40,r:20,t:20,b:30};
+  const xs = w-pad.l-pad.r, ys = h-pad.t-pad.b;
+  const min = Math.min(...data.map(d=>d.weight)) - 1;
+  const max = Math.max(...data.map(d=>d.weight)) + 1;
+
+  ctx.strokeStyle="#d9d2c1"; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y = pad.t + ys*i/4;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+    const v = (max - (max-min)*i/4).toFixed(1);
+    ctx.fillStyle="#8a8a8a"; ctx.font="10px DM Mono"; ctx.textAlign="right";
+    ctx.fillText(v, pad.l-6, y+3);
+  }
+
+  ctx.strokeStyle="#c8102e"; ctx.lineWidth=2.5;
+  ctx.beginPath();
+  data.forEach((d,i)=>{
+    const x = pad.l + (data.length===1?xs/2:xs*i/(data.length-1));
+    const y = pad.t + ys*(1 - (d.weight-min)/(max-min));
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  data.forEach((d,i)=>{
+    const x = pad.l + (data.length===1?xs/2:xs*i/(data.length-1));
+    const y = pad.t + ys*(1 - (d.weight-min)/(max-min));
+    ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle="#c8102e"; ctx.lineWidth=2; ctx.stroke();
+  });
+
+  ctx.fillStyle="#8a8a8a"; ctx.font="10px DM Mono"; ctx.textAlign="center";
+  const step = Math.max(1, Math.floor(data.length/5));
+  data.forEach((d,i)=>{
+    if(i%step===0 || i===data.length-1){
+      const x = pad.l + (data.length===1?xs/2:xs*i/(data.length-1));
+      ctx.fillText(fmtDate(d.date), x, h-10);
+    }
+  });
+}
+window.addEventListener('resize',()=>buildChart());
+
+/* ============ CONQUISTAS ============ */
+function buildAchievements(){
+  const c = document.getElementById('achievementsList');
+  c.innerHTML = ACHIEVEMENTS.map(a=>{
+    const u = S.unlocked.includes(a.id);
+    return `<div class="achievement ${u?'unlocked':''}">
+      <span class="icon">${a.icon}</span>
+      <div class="name">${a.name}</div>
+      <div class="desc">${a.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{
+    if(!S.unlocked.includes(a.id) && a.check(S)){
+      S.unlocked.push(a.id);
+      S.xp += 100;
+      toast("MEDALHA: "+a.name, a.desc + " · +100 XP", "pr");
+    }
+  });
+  save(); refreshHeader(); buildAchievements();
+}
+
+document.getElementById('hardReset').addEventListener('click',()=>{
+  if(!confirm("Resetar TODOS os dados? Essa ação não pode ser desfeita.")) return;
+  if(!confirm("Confirma mesmo? Tudo será apagado.")) return;
+  localStorage.removeItem(KEY);
+  S = JSON.parse(JSON.stringify(defaultState));
+  initAll();
+  toast("Reset completo","Todos os dados foram apagados.","default");
+});
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='evolucao') setTimeout(buildChart,80);
+    if(t.dataset.tab==='config') refreshNotifStatus();
+  });
+});
+
+/* ============ COMPARTILHAR ============ */
+let exportPeriod = 'all';
+let reportType = 'week';
+let cardFormat = 'square';
+let cardContent = 'weekly';
+let importMode = 'merge';
+
+function bindToggleGroup(containerId, attrName, callback){
+  document.getElementById(containerId).addEventListener('click', e=>{
+    const btn = e.target.closest(`button[data-${attrName}]`);
+    if(!btn) return;
+    btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    callback(btn.dataset[attrName]);
+  });
+}
+bindToggleGroup('exportPeriod','p',v=>exportPeriod=v);
+bindToggleGroup('cardFormat','fmt',v=>{cardFormat=v;});
+bindToggleGroup('cardContent','c',v=>{cardContent=v;});
+document.querySelectorAll('[data-rep]').forEach(b=>{
+  b.addEventListener('click',e=>{
+    document.querySelectorAll('[data-rep]').forEach(x=>x.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    reportType = e.currentTarget.dataset.rep;
+  });
+});
+document.querySelectorAll('[data-mode]').forEach(b=>{
+  b.addEventListener('click',e=>{
+    document.querySelectorAll('[data-mode]').forEach(x=>x.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    importMode = e.currentTarget.dataset.mode;
+    document.getElementById('importModeDesc').innerHTML = importMode === 'merge'
+      ? "<strong>Mesclar:</strong> mantém dados atuais, adiciona/atualiza com o JSON (PRs maiores prevalecem)."
+      : "<strong>⚠ Substituir:</strong> apaga todos os dados atuais e usa apenas o JSON.";
+  });
+});
+
+/* Filter data by period */
+function filterByPeriod(period){
+  const t = new Date();
+  const today = todayStr();
+  let from = null;
+
+  if(period==='week'){
+    const dow = t.getDay();
+    const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7));
+    from = monday.toISOString().slice(0,10);
+  } else if(period==='month'){
+    from = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;
+  } else if(period==='last7'){
+    const d = new Date(t); d.setDate(t.getDate()-7);
+    from = d.toISOString().slice(0,10);
+  } else if(period==='last30'){
+    const d = new Date(t); d.setDate(t.getDate()-30);
+    from = d.toISOString().slice(0,10);
+  }
+
+  if(!from) return JSON.parse(JSON.stringify(S));
+
+  const inRange = d => d >= from && d <= today;
+  const filtered = JSON.parse(JSON.stringify(S));
+  filtered.daySessions = Object.fromEntries(Object.entries(S.daySessions).filter(([k])=>inRange(k)));
+  filtered.mealsByDay  = Object.fromEntries(Object.entries(S.mealsByDay).filter(([k])=>inRange(k)));
+  filtered.history     = S.history.filter(h=>inRange(h.date));
+  filtered._period     = { from, to: today };
+  return filtered;
+}
+
+function buildExportPayload(){
+  const data = filterByPeriod(exportPeriod);
+  return {
+    _meta: {
+      app: "Showcase Dojo",
+      version: "1.1",
+      exportedAt: new Date().toISOString(),
+      user: "Felipe",
+      period: exportPeriod,
+      range: data._period || null
+    },
+    data
+  };
+}
+
+document.getElementById('downloadJson').addEventListener('click',()=>{
+  const payload = buildExportPayload();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dt = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `dojo-felipe-${exportPeriod}-${dt}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("JSON baixado","Arquivo salvo na pasta de downloads","ok");
+});
+
+document.getElementById('shareJson').addEventListener('click', async ()=>{
+  const payload = buildExportPayload();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const file = new File([blob], `dojo-felipe-${exportPeriod}.json`, {type:"application/json"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try {
+      await navigator.share({files:[file], title:"Dojo Felipe — Backup", text:"Meu progresso no Showcase Dojo"});
+      toast("Compartilhado!","JSON enviado","ok");
+    } catch(e){ if(e.name!=="AbortError") toast("Erro","Não foi possível compartilhar"); }
+  } else {
+    document.getElementById('downloadJson').click();
+    toast("Compartilhamento indisponível","Arquivo baixado, anexe manualmente");
+  }
+});
+
+document.getElementById('pickJson').addEventListener('click',()=>document.getElementById('jsonFile').click());
+
+document.getElementById('jsonFile').addEventListener('change', async e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try {
+    const text = await file.text();
+    const payload = JSON.parse(text);
+    const incoming = payload.data || payload;
+    if(!incoming || typeof incoming !== 'object'){ throw new Error("Formato inválido"); }
+
+    if(importMode === 'replace'){
+      if(!confirm("Substituir TODOS os dados atuais pelo arquivo? Essa ação é irreversível.")) return;
+      S = Object.assign({}, defaultState, incoming);
+      if(incoming.notifications) S.notifications = Object.assign({}, defaultState.notifications, incoming.notifications);
+    } else {
+      // Merge: PRs maiores ganham, sessões e refeições adicionam, history mescla por data
+      const merged = JSON.parse(JSON.stringify(S));
+      // PRs
+      for(const [k,v] of Object.entries(incoming.PRs||{})){
+        if(!merged.PRs[k] || (v.weight||0) > merged.PRs[k].weight) merged.PRs[k] = v;
+      }
+      // Loads
+      Object.assign(merged.loads, incoming.loads||{});
+      // Sessions
+      Object.assign(merged.daySessions, incoming.daySessions||{});
+      // Meals
+      Object.assign(merged.mealsByDay, incoming.mealsByDay||{});
+      // History (deduplica por data, mantém mais recente)
+      const histMap = new Map(merged.history.map(h=>[h.date,h]));
+      (incoming.history||[]).forEach(h=>histMap.set(h.date,h));
+      merged.history = Array.from(histMap.values()).sort((a,b)=>a.date.localeCompare(b.date));
+      // Counters: pega o maior
+      ['totalSessions','totalMeals','perfectDays','bestStreak','xp'].forEach(k=>{
+        merged[k] = Math.max(merged[k]||0, incoming[k]||0);
+      });
+      // Unlocked: união
+      merged.unlocked = Array.from(new Set([...(merged.unlocked||[]), ...(incoming.unlocked||[])]));
+      S = merged;
+    }
+    save(); initAll();
+    toast("Importado!", `${importMode==='merge'?'Mesclado':'Substituído'} com sucesso`, "ok");
+  } catch(err){
+    toast("Erro ao importar", err.message || "Arquivo inválido");
+  }
+  e.target.value = "";
+});
+
+/* Reports */
+function buildReport(type){
+  const t = new Date();
+  let from, label;
+  if(type==='week'){
+    const dow = t.getDay();
+    const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7));
+    from = monday.toISOString().slice(0,10);
+    label = "RELATÓRIO SEMANAL";
+  } else {
+    from = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;
+    label = "RELATÓRIO MENSAL";
+  }
+  const today = todayStr();
+  const inRange = d => d >= from && d <= today;
+
+  const sessions = Object.entries(S.daySessions).filter(([k,v])=>inRange(k) && v.finished);
+  const totalEx = sessions.reduce((acc,[,v])=>acc+Object.values(v.exercises||{}).filter(Boolean).length, 0);
+  const meals = Object.entries(S.mealsByDay).filter(([k])=>inRange(k));
+  const totalMeals = meals.reduce((acc,[,v])=>acc+Object.keys(v).length, 0);
+  const expectedMeals = meals.length * 5;
+  const adherence = expectedMeals ? Math.round(totalMeals/expectedMeals*100) : 0;
+  const weighings = S.history.filter(h=>inRange(h.date));
+  const firstW = weighings[0], lastW = weighings[weighings.length-1];
+  const wDelta = (firstW && lastW && firstW !== lastW) ? (lastW.weight - firstW.weight).toFixed(1) : null;
+
+  const recentPRs = Object.entries(S.PRs).filter(([,p])=>inRange(p.date)).sort((a,b)=>b[1].date.localeCompare(a[1].date));
+
+  const fromFmt = fmtDateLong(from), toFmt = fmtDateLong(today);
+  const rank = currentRank(S.xp);
+
+  let out = `╔═══════════════════════════════╗
+║   ⛩  SHOWCASE DOJO  ·  FELIPE  ║
+╚═══════════════════════════════╝
+
+📊 ${label}
+📅 ${fromFmt} → ${toFmt}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🥋 RANK ATUAL: ${rank.name} (${rank.ptbr})
+⚡ XP TOTAL: ${S.xp}
+🔥 STREAK: ${S.currentStreak} dias (melhor: ${S.bestStreak})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏋 TREINOS
+   Sessões completas: ${sessions.length}
+   Exercícios feitos: ${totalEx}
+   Dias treinados: ${sessions.map(([k])=>fmtDate(k)).join(', ') || '—'}
+
+🍱 ALIMENTAÇÃO
+   Refeições marcadas: ${totalMeals}/${expectedMeals || '—'}
+   Aderência: ${adherence}%
+
+⚖ EVOLUÇÃO CORPORAL`;
+
+  if(weighings.length===0){
+    out += `\n   Nenhuma pesagem no período`;
+  } else {
+    out += `\n   Pesagens: ${weighings.length}`;
+    out += `\n   Peso atual: ${lastW.weight} kg`;
+    if(wDelta !== null){
+      out += `\n   Variação: ${wDelta>0?'+':''}${wDelta} kg`;
+    }
+    if(lastW.waist) out += `\n   Cintura: ${lastW.waist} cm`;
+    if(lastW.chest) out += `\n   Peito: ${lastW.chest} cm`;
+    if(lastW.arm)   out += `\n   Braço: ${lastW.arm} cm`;
+    if(lastW.thigh) out += `\n   Coxa: ${lastW.thigh} cm`;
+  }
+
+  if(recentPRs.length){
+    out += `\n\n💪 PRs DO PERÍODO`;
+    recentPRs.slice(0,8).forEach(([k,v])=>{
+      out += `\n   ${k}: ${v.weight} kg (${fmtDate(v.date)})`;
+    });
+  }
+
+  if(S.unlocked.length){
+    out += `\n\n🏆 MEDALHAS DESBLOQUEADAS: ${S.unlocked.length}/${ACHIEVEMENTS.length}`;
+  }
+
+  out += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+道 場 · "千里の道も一歩から"
+Gerado em ${new Date().toLocaleString('pt-BR')}`;
+
+  return out;
+}
+
+document.getElementById('genReport').addEventListener('click',()=>{
+  const txt = buildReport(reportType);
+  document.getElementById('reportText').value = txt;
+  document.getElementById('reportPreview').classList.remove('hidden');
+  toast("Relatório gerado","Use copiar ou compartilhar","ok");
+});
+
+document.getElementById('copyReport').addEventListener('click', async ()=>{
+  const txt = document.getElementById('reportText').value;
+  if(!txt){ toast("Gere o relatório primeiro"); return; }
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast("Copiado!","Cole no WhatsApp ou Email","ok");
+  } catch(e){
+    document.getElementById('reportText').select();
+    document.execCommand('copy');
+    toast("Copiado","",  "ok");
+  }
+});
+
+document.getElementById('shareReport').addEventListener('click', async ()=>{
+  const txt = document.getElementById('reportText').value;
+  if(!txt){ toast("Gere o relatório primeiro"); return; }
+  if(navigator.share){
+    try {
+      await navigator.share({title:"Relatório Dojo · Felipe", text: txt});
+    } catch(e){ if(e.name!=="AbortError") toast("Erro","Compartilhamento cancelado"); }
+  } else {
+    document.getElementById('copyReport').click();
+  }
+});
+
+/* Card PNG generation */
+function drawCard(){
+  const canvas = document.getElementById('cardCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = cardFormat==='story' ? 1080 : 1080;
+  const H = cardFormat==='story' ? 1920 : 1080;
+  canvas.width = W; canvas.height = H;
+
+  // Background
+  const grad = ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0,"#faf6ed"); grad.addColorStop(1,"#f0ebe0");
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+  // Texture (subtle dots)
+  ctx.fillStyle = "rgba(26,26,26,0.02)";
+  for(let i=0;i<400;i++){
+    ctx.beginPath();
+    ctx.arc(Math.random()*W, Math.random()*H, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // Top bar
+  ctx.fillStyle = "#c8102e";
+  ctx.fillRect(0,0,W,12);
+
+  // Decorative kanji watermark
+  ctx.fillStyle = "rgba(200,16,46,0.06)";
+  ctx.font = `900 ${cardFormat==='story'?900:600}px 'Noto Serif JP', serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("武", W/2, H*0.55);
+
+  // Hinomaru on top
+  const hinoY = cardFormat==='story' ? 200 : 130;
+  const hinoR = cardFormat==='story' ? 70 : 55;
+  ctx.fillStyle = "#c8102e";
+  ctx.beginPath();
+  ctx.arc(W/2, hinoY, hinoR, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.font = `900 ${hinoR*1.1}px 'Noto Serif JP', serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("武", W/2, hinoY+2);
+
+  // Title
+  ctx.fillStyle = "#1a1a1a";
+  ctx.textAlign = "center";
+  let y = hinoY + hinoR + (cardFormat==='story' ? 90 : 70);
+  ctx.font = `bold ${cardFormat==='story'?64:50}px Arial, sans-serif`;
+  ctx.fillText("SHOWCASE DOJO", W/2, y);
+
+  ctx.fillStyle = "#8a8a8a";
+  ctx.font = `${cardFormat==='story'?28:22}px Arial, sans-serif`;
+  y += cardFormat==='story' ? 40 : 30;
+  ctx.fillText("FELIPE · XSHOWCASE TEAM", W/2, y);
+
+  // Period label
+  y += cardFormat==='story' ? 80 : 60;
+  let periodLabel = "";
+  if(cardContent==='weekly') periodLabel = "RESUMO SEMANAL";
+  else if(cardContent==='monthly') periodLabel = "RESUMO MENSAL";
+  else periodLabel = "TOP RECORDES";
+
+  ctx.fillStyle = "#c8102e";
+  ctx.font = `bold ${cardFormat==='story'?28:22}px Arial`;
+  ctx.fillText(periodLabel, W/2, y);
+
+  // Stats grid
+  y += cardFormat==='story' ? 80 : 60;
+
+  const t = new Date();
+  let from = todayStr();
+  if(cardContent==='weekly'){
+    const dow = t.getDay();
+    const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7));
+    from = monday.toISOString().slice(0,10);
+  } else if(cardContent==='monthly'){
+    from = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;
+  }
+  const today = todayStr();
+  const inRange = d => d >= from && d <= today;
+
+  if(cardContent==='prs'){
+    // Top PRs list
+    const prs = Object.entries(S.PRs).sort((a,b)=>b[1].weight - a[1].weight).slice(0, cardFormat==='story'?8:6);
+    const itemH = cardFormat==='story' ? 110 : 85;
+    prs.forEach(([name,pr], i)=>{
+      const py = y + i*itemH;
+      // Number badge
+      ctx.fillStyle = i===0 ? "#c9a227" : (i===1 ? "#c0c0c0" : (i===2 ? "#cd7f32" : "#1a1a1a"));
+      ctx.beginPath();
+      ctx.arc(W*0.15, py+itemH/2-15, cardFormat==='story'?32:26, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = `bold ${cardFormat==='story'?32:26}px Arial`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(i+1), W*0.15, py+itemH/2-15);
+      // Name
+      ctx.fillStyle = "#1a1a1a";
+      ctx.font = `bold ${cardFormat==='story'?34:26}px Arial`;
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      const truncated = name.length > 28 ? name.slice(0,26)+"..." : name;
+      ctx.fillText(truncated, W*0.22, py+itemH/2-25);
+      ctx.fillStyle = "#8a8a8a";
+      ctx.font = `${cardFormat==='story'?20:16}px Arial`;
+      ctx.fillText(fmtDate(pr.date), W*0.22, py+itemH/2+5);
+      // Weight
+      ctx.fillStyle = "#c8102e";
+      ctx.font = `bold ${cardFormat==='story'?44:34}px Arial`;
+      ctx.textAlign = "right";
+      ctx.fillText(pr.weight + " kg", W*0.92, py+itemH/2-15);
+    });
+    if(!prs.length){
+      ctx.fillStyle = "#8a8a8a";
+      ctx.font = `${cardFormat==='story'?28:22}px Arial`;
+      ctx.textAlign = "center";
+      ctx.fillText("Nenhum PR ainda", W/2, y+50);
+    }
+  } else {
+    // Stats
+    const sessions = Object.entries(S.daySessions).filter(([k,v])=>inRange(k) && v.finished);
+    const meals = Object.entries(S.mealsByDay).filter(([k])=>inRange(k));
+    const totalMeals = meals.reduce((acc,[,v])=>acc+Object.keys(v).length, 0);
+    const expectedMeals = meals.length * 5;
+    const adherence = expectedMeals ? Math.round(totalMeals/expectedMeals*100) : 0;
+    const weighings = S.history.filter(h=>inRange(h.date));
+    const lastW = weighings[weighings.length-1];
+    const firstW = weighings[0];
+    const wDelta = (firstW && lastW && firstW !== lastW) ? (lastW.weight - firstW.weight).toFixed(1) : null;
+
+    const stats = [
+      { label:"TREINOS", value: sessions.length, sub:"sessões" },
+      { label:"ADERÊNCIA", value: adherence+"%", sub:"refeições" },
+      { label:"PESO", value: lastW ? lastW.weight+"kg" : "—", sub: wDelta!==null ? ((wDelta>0?"+":"")+wDelta+" kg") : "atual" },
+      { label:"STREAK", value: S.currentStreak+"🔥", sub:"dias" },
+    ];
+
+    const cellW = W*0.42;
+    const cellH = cardFormat==='story' ? 220 : 170;
+    const gap = cardFormat==='story' ? 40 : 30;
+    const startX = W/2 - cellW - gap/2;
+
+    stats.forEach((s,i)=>{
+      const cx = startX + (i%2)*(cellW+gap);
+      const cy = y + Math.floor(i/2)*(cellH+gap);
+      // Card
+      ctx.fillStyle = "#faf6ed";
+      ctx.strokeStyle = "#d9d2c1";
+      ctx.lineWidth = 2;
+      ctx.fillRect(cx, cy, cellW, cellH);
+      ctx.strokeRect(cx, cy, cellW, cellH);
+      // Red accent stripe
+      ctx.fillStyle = "#c8102e";
+      ctx.fillRect(cx, cy, cellW, 6);
+      // Label
+      ctx.fillStyle = "#8a8a8a";
+      ctx.font = `bold ${cardFormat==='story'?22:18}px Arial`;
+      ctx.textAlign = "left"; ctx.textBaseline = "top";
+      ctx.fillText(s.label, cx+20, cy+24);
+      // Value
+      ctx.fillStyle = "#1a1a1a";
+      ctx.font = `bold ${cardFormat==='story'?80:62}px Arial`;
+      ctx.fillText(s.value, cx+20, cy+(cardFormat==='story'?60:50));
+      // Sub
+      ctx.fillStyle = "#8a8a8a";
+      ctx.font = `${cardFormat==='story'?20:16}px Arial`;
+      ctx.fillText(s.sub, cx+20, cy+cellH-(cardFormat==='story'?40:32));
+    });
+
+    // PRs preview at bottom
+    const recentPRs = Object.entries(S.PRs).filter(([,p])=>inRange(p.date)).sort((a,b)=>b[1].date.localeCompare(a[1].date)).slice(0,3);
+    if(recentPRs.length){
+      let py = y + 2*(cellH+gap) + (cardFormat==='story'?40:30);
+      ctx.fillStyle = "#c8102e";
+      ctx.font = `bold ${cardFormat==='story'?26:20}px Arial`;
+      ctx.textAlign = "center";
+      ctx.fillText("⚡ PRS RECENTES", W/2, py);
+      py += cardFormat==='story' ? 50 : 38;
+      recentPRs.forEach(([name,pr])=>{
+        ctx.fillStyle = "#1a1a1a";
+        ctx.font = `${cardFormat==='story'?24:18}px Arial`;
+        ctx.textAlign = "center";
+        const truncated = name.length > 30 ? name.slice(0,28)+"..." : name;
+        ctx.fillText(`${truncated} · ${pr.weight} kg`, W/2, py);
+        py += cardFormat==='story' ? 38 : 28;
+      });
+    }
+  }
+
+  // Footer
+  const footY = H - (cardFormat==='story' ? 80 : 60);
+  ctx.fillStyle = "#c8102e";
+  ctx.font = `bold ${cardFormat==='story'?22:16}px 'Noto Serif JP'`;
+  ctx.textAlign = "center";
+  ctx.fillText("道 場 · 千里の道も一歩から", W/2, footY);
+  ctx.fillStyle = "#8a8a8a";
+  ctx.font = `${cardFormat==='story'?18:14}px Arial`;
+  ctx.fillText(new Date().toLocaleDateString('pt-BR'), W/2, footY+(cardFormat==='story'?32:24));
+
+  // Bottom bar
+  ctx.fillStyle = "#c8102e";
+  ctx.fillRect(0, H-12, W, 12);
+}
+
+document.getElementById('genCard').addEventListener('click',()=>{
+  drawCard();
+  document.getElementById('cardPreview').classList.remove('hidden');
+  document.getElementById('downloadCard').disabled = false;
+  document.getElementById('shareCard').disabled = false;
+  toast("Card gerado","Pronto para baixar ou compartilhar","ok");
+});
+
+document.getElementById('downloadCard').addEventListener('click',()=>{
+  const canvas = document.getElementById('cardCanvas');
+  canvas.toBlob(blob=>{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dojo-card-${cardContent}-${cardFormat}-${todayStr()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("PNG baixado","Pasta downloads","ok");
+  });
+});
+
+document.getElementById('shareCard').addEventListener('click', async ()=>{
+  const canvas = document.getElementById('cardCanvas');
+  canvas.toBlob(async blob=>{
+    const file = new File([blob], `dojo-card-${cardContent}.png`, {type:"image/png"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try {
+        await navigator.share({files:[file], title:"Showcase Dojo", text:"Meu progresso! 💪"});
+        toast("Compartilhado!","","ok");
+      } catch(e){ if(e.name!=="AbortError") toast("Erro","Cancelado"); }
+    } else {
+      document.getElementById('downloadCard').click();
+      toast("Compartilhamento indisponível","Baixado, anexe manualmente");
+    }
+  });
+});
+
+/* ============ NOTIFICATIONS ============ */
+const notifKeys = ['train','meal1','meal2','meal3','meal4','meal5','weigh'];
+
+function loadNotifUI(){
+  notifKeys.forEach(k=>{
+    const cfg = S.notifications[k] || {on:false, time:"08:00"};
+    const elTime = document.getElementById('notif' + k.charAt(0).toUpperCase()+k.slice(1));
+    const elOn   = document.getElementById('notif' + k.charAt(0).toUpperCase()+k.slice(1) + 'On');
+    if(elTime) elTime.value = cfg.time;
+    if(elOn)   elOn.checked = cfg.on;
+  });
+}
+
+function bindNotifUI(){
+  notifKeys.forEach(k=>{
+    const elTime = document.getElementById('notif' + k.charAt(0).toUpperCase()+k.slice(1));
+    const elOn   = document.getElementById('notif' + k.charAt(0).toUpperCase()+k.slice(1) + 'On');
+    if(elTime) elTime.addEventListener('change',()=>{ S.notifications[k].time = elTime.value; save(); });
+    if(elOn) elOn.addEventListener('change', async ()=>{
+      if(elOn.checked){
+        const ok = await requestNotifPermission();
+        if(!ok){ elOn.checked = false; return; }
+      }
+      S.notifications[k].on = elOn.checked;
+      save();
+      refreshNotifStatus();
+    });
+  });
+}
+
+async function requestNotifPermission(){
+  if(!("Notification" in window)){
+    toast("Indisponível","Seu navegador não suporta notificações");
+    return false;
+  }
+  if(Notification.permission === "granted") return true;
+  if(Notification.permission === "denied"){
+    toast("Bloqueado","Habilite notificações nas configurações do navegador");
+    return false;
+  }
+  const r = await Notification.requestPermission();
+  return r === "granted";
+}
+
+function refreshNotifStatus(){
+  const el = document.getElementById('notifStatus');
+  if(!el) return;
+  if(!("Notification" in window)){
+    el.innerHTML = `⚠ <strong>Notificações não suportadas</strong> neste navegador.`;
+    return;
+  }
+  const perm = Notification.permission;
+  if(perm === "granted"){
+    const enabled = notifKeys.filter(k=>S.notifications[k]?.on).length;
+    el.innerHTML = `✅ <strong>Permitido</strong> · ${enabled} lembrete(s) ativo(s).<br>
+    <span style="color:var(--ink-mute);font-size:11px">Lembretes disparam quando o app está aberto ou recém-fechado. Para garantir todos, use também o app Lembretes/Alarme do celular como backup.</span>`;
+  } else if(perm === "denied"){
+    el.innerHTML = `❌ <strong>Bloqueado</strong> · habilite nas configurações do navegador.`;
+  } else {
+    el.innerHTML = `🔒 <strong>Permissão necessária</strong> · ative algum lembrete para conceder.`;
+  }
+}
+
+function checkAndFireNotifications(){
+  if(!("Notification" in window) || Notification.permission !== "granted") return;
+  const now = new Date();
+  const today = todayStr();
+  const hhmm = now.toTimeString().slice(0,5);
+  const titles = {
+    train: ["⛩ Hora de treinar","Vamos pro dojo, senshi!"],
+    meal1: ["🍙 Café da manhã","Hora da refeição 1"],
+    meal2: ["🍱 Almoço","Hora da refeição 2"],
+    meal3: ["⚡ Pré-treino","Hora da refeição 3"],
+    meal4: ["🍽 Jantar","Hora da refeição 4"],
+    meal5: ["🌙 Ceia","Hora da refeição 5"],
+    weigh: ["⚖ Pesagem semanal","Registre seu peso na aba Evolução"]
+  };
+  notifKeys.forEach(k=>{
+    const cfg = S.notifications[k];
+    if(!cfg || !cfg.on) return;
+    const fireKey = `${today}-${k}`;
+    if(S.notifications.lastFired[fireKey]) return;
+
+    // Pesagem só dispara aos domingos
+    if(k==='weigh' && now.getDay() !== 0) return;
+
+    if(cfg.time === hhmm){
+      const [title, body] = titles[k];
+      try {
+        new Notification(title, {
+          body,
+          icon: "./icon-192.png",
+          badge: "./icon-192.png",
+          tag: fireKey,
+          requireInteraction: false
+        });
+        S.notifications.lastFired[fireKey] = Date.now();
+        // Limpa fired antigos (>3 dias)
+        const cutoff = Date.now() - 3*24*60*60*1000;
+        for(const fk in S.notifications.lastFired){
+          if(S.notifications.lastFired[fk] < cutoff) delete S.notifications.lastFired[fk];
+        }
+        save();
+      } catch(e){ console.warn("Notif error:",e); }
+    }
+  });
+}
+
+setInterval(checkAndFireNotifications, 30000); // a cada 30s
+
+/* ============ PWA INSTALL ============ */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner if not dismissed before
+  if(!localStorage.getItem('dojo_install_dismissed')){
+    document.getElementById('installBanner').classList.remove('hidden');
+  }
+  document.getElementById('installBtn').classList.remove('hidden');
+});
+
+document.getElementById('installBtn').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  if(choice.outcome === 'accepted'){
+    toast("Instalado!","O Dojo foi adicionado","ok");
+  }
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.add('hidden');
+});
+
+document.getElementById('installBannerBtn').addEventListener('click',()=>{
+  document.getElementById('installBtn').click();
+});
+
+document.getElementById('installClose').addEventListener('click',()=>{
+  document.getElementById('installBanner').classList.add('hidden');
+  localStorage.setItem('dojo_install_dismissed','1');
+});
+
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('installBanner').classList.add('hidden');
+  document.getElementById('installBtn').classList.add('hidden');
+  toast("Bem-vindo ao Dojo!","App instalado com sucesso","ok");
+});
+
+function setupInstallInstructions(){
+  const el = document.getElementById('installInstructions');
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+
+  if(isStandalone){
+    el.innerHTML = `✅ <strong>App já instalado.</strong> Você está usando o Dojo como aplicativo nativo.`;
+  } else if(isIOS){
+    el.innerHTML = `<strong>iPhone/iPad (Safari):</strong><ol style="margin-left:18px;margin-top:6px">
+      <li>Toque no botão <strong>Compartilhar</strong> (ícone de quadrado com seta)</li>
+      <li>Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong></li>
+      <li>Confirme — o ícone do Dojo aparecerá na tela inicial</li>
+    </ol>`;
+  } else if(isAndroid){
+    el.innerHTML = `<strong>Android (Chrome):</strong><ol style="margin-left:18px;margin-top:6px">
+      <li>Toque no menu (três pontos no canto superior)</li>
+      <li>Selecione <strong>"Instalar app"</strong> ou <strong>"Adicionar à tela inicial"</strong></li>
+      <li>Confirme</li>
+    </ol>${deferredPrompt ? '<p style="margin-top:10px;color:var(--matcha)">✓ Ou use o botão acima para instalar agora.</p>':''}`;
+  } else {
+    el.innerHTML = `<strong>Desktop (Chrome/Edge):</strong> clique no ícone de instalação na barra de endereço (à direita), ou use o botão abaixo se aparecer.`;
+  }
+}
+
+/* ============ INIT ============ */
+function initAll(){
+  refreshHeader();
+  buildHome();
+  buildDayTabs();
+  buildExercises();
+  buildMeals();
+  buildHistory();
+  buildChart();
+  buildAchievements();
+  loadNotifUI();
+  bindNotifUI();
+  setupInstallInstructions();
+  refreshNotifStatus();
+}
+initAll();
+
+/* ============ SERVICE WORKER ============ */
+if("serviceWorker" in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg=>console.log('SW registered:', reg.scope))
+      .catch(err=>console.warn('SW failed:', err));
+  });
+}
+</script>
+</body>
+</html>
