@@ -3,10 +3,11 @@
  * Versão: bump CACHE_NAME para invalidar cache antigo após updates
  */
 
-const CACHE_NAME = "dojo-v1.0.1";
+const CACHE_NAME = "dojo-v2.0.0";
 const SHELL = [
   "./",
   "./index.html",
+  "./db.js",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
@@ -40,8 +41,19 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(req.url);
 
-  // Para Google Fonts: network-first, fallback cache
-  if (url.hostname.includes("fonts.googleapis.com") || url.hostname.includes("fonts.gstatic.com")) {
+  // Supabase (REST/Auth): nunca intercepta. São respostas dinâmicas e
+  // específicas do usuário (autenticadas) — cachear arriscaria servir
+  // dado de outro usuário/sessão ou desperdiçar espaço à toa.
+  if (url.hostname.endsWith("supabase.co")) {
+    return;
+  }
+
+  // Google Fonts e o CDN do supabase-js: network-first, fallback cache
+  if (
+    url.hostname.includes("fonts.googleapis.com") ||
+    url.hostname.includes("fonts.gstatic.com") ||
+    url.hostname.includes("cdn.jsdelivr.net")
+  ) {
     event.respondWith(
       fetch(req).then((res) => {
         const clone = res.clone();

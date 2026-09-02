@@ -1,10 +1,10 @@
-# 武 Showcase Dojo · Felipe
+# 武 Showcase Dojo
 
-Aplicação PWA gamificada para acompanhamento de treino, dieta e evolução física, com tema dojo japonês.
+Aplicação PWA gamificada para acompanhamento de treino, dieta e evolução física, com tema dojo japonês. Multi-usuário, com conta e dados sincronizados via Supabase.
 
 ## ⛩ Funcionalidades
 
-- **Acompanhamento diário** de treino (6 dias) e dieta (5 refeições)
+- **Rotina de treino totalmente editável** por usuário (dias e exercícios: criar, renomear, reordenar, arquivar) e dieta (5 refeições)
 - **Personal Records (PRs)** automáticos por exercício
 - **Sistema de XP e faixas** (Branca → Amarela → Verde → Azul → Marrom → Preta → Shihan)
 - **12 medalhas** desbloqueáveis
@@ -15,16 +15,18 @@ Aplicação PWA gamificada para acompanhamento de treino, dieta e evolução fí
 - **Cards visuais PNG** para Instagram (Feed 1:1 e Stories 9:16)
 - **Notificações de lembrete** configuráveis (treino, 5 refeições, pesagem semanal)
 - **PWA instalável** com ícone na tela inicial
-- **Funciona 100% offline** após primeira abertura
+- **Conta com login** (Supabase Auth) — dados sincronizados entre dispositivos, isolados por usuário
 - **Tema claro estilo japonês esportivo** (anime/manga vibe)
 
 ## 📁 Estrutura do projeto
 
 ```
 dojo-pwa/
-├── index.html              # App principal (todo o código)
+├── index.html              # App principal (UI + lógica)
+├── db.js                   # Client Supabase + camada de acesso a dados
+├── supabase/schema.sql     # Schema Postgres (tabelas, RLS, RPCs) — rodar no projeto Supabase
 ├── manifest.json           # Manifest do PWA
-├── sw.js                   # Service Worker (cache offline)
+├── sw.js                   # Service Worker (cache offline da casca do app)
 ├── vercel.json             # Config de headers para Vercel
 ├── icon-192.png            # Ícone 192×192
 ├── icon-512.png            # Ícone 512×512
@@ -33,6 +35,14 @@ dojo-pwa/
 ├── apple-touch-icon.png    # iOS 180×180
 └── favicon-32.png          # Favicon
 ```
+
+## 🗄 Provisionando o backend (Supabase)
+
+1. Crie um projeto em [supabase.com](https://supabase.com) (free tier é suficiente).
+2. Rode todo o conteúdo de `supabase/schema.sql` no SQL Editor do projeto.
+3. Em Project Settings → API, copie a `Project URL` e a chave `anon`/`public`.
+4. Cole os dois valores nas constantes `SUPABASE_URL`/`SUPABASE_ANON_KEY` no topo de `db.js`. É seguro expor essa chave no client — a segurança real é a Row Level Security de cada tabela.
+5. Em Authentication → URL Configuration, defina a Site URL como o domínio de produção (Vercel) e adicione as Redirect URLs correspondentes.
 
 ## 🚀 Deploy no Vercel
 
@@ -85,10 +95,10 @@ vercel --prod
 
 ## 💾 Sobre os dados
 
-- **Tudo é salvo localmente** no navegador via `localStorage`
-- **Não há servidor**, login ou sincronização entre dispositivos
-- Limpar cache do navegador apaga os dados — use **Export JSON** regularmente como backup
-- Para "migrar" entre dispositivos: exporte JSON em um, importe no outro
+- **Os dados ficam no Supabase**, isolados por usuário (Row Level Security) — sincronizam automaticamente entre dispositivos ao logar na mesma conta.
+- **O app abre offline** (a casca é cacheada pelo Service Worker), mas **gravar dados exige conexão** (marcar treino/refeição, PR, pesagem). Sem fila de sincronização offline nesta versão.
+- Ainda existe **Export/Import JSON** para backup manual ou envio ao treinador.
+- Quem tinha dados de antes das contas: no primeiro login, se o app encontrar um backup antigo no `localStorage` do dispositivo, ele oferece importar automaticamente para a conta.
 
 ## 🔔 Sobre as notificações
 
@@ -97,12 +107,12 @@ As notificações funcionam quando o app está aberto ou foi aberto recentemente
 ## 🔧 Atualizando o app
 
 Se você modificar o código e fizer redeploy:
-1. Bump a versão `CACHE_NAME` no `sw.js` (ex: `dojo-v1.0.1` → `dojo-v1.0.2`)
+1. Bump a versão `CACHE_NAME` no `sw.js` (ex: `dojo-v2.0.0` → `dojo-v2.0.1`)
 2. Os usuários receberão a nova versão automaticamente na próxima abertura
 
 ## 📜 Licença
 
-Uso pessoal · Felipe XSHOWCASE TEAM
+Uso pessoal · XSHOWCASE TEAM
 
 ---
 
