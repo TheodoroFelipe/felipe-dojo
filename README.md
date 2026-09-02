@@ -112,7 +112,7 @@ Se você modificar o código e fizer redeploy:
 
 ## 📜 Licença
 
-Uso pessoal · XSHOWCASE TEAM
+Uso pessoal · Meu Dojo
 
 ---
 
