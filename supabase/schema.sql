@@ -1,5 +1,5 @@
 -- ============================================================
--- Showcase Dojo — schema Postgres para Supabase
+-- Meu Dojo — schema Postgres para Supabase
 -- Não é servido ao browser. Rodar no SQL Editor do projeto Supabase
 -- (ou via `supabase db push`) ao provisionar o backend.
 -- ============================================================

@@ -1,9 +1,9 @@
-/* Showcase Dojo Service Worker
+/* Meu Dojo Service Worker
  * Estratégia: cache-first para shell, network-first para fontes externas
  * Versão: bump CACHE_NAME para invalidar cache antigo após updates
  */
 
-const CACHE_NAME = "dojo-v2.0.0";
+const CACHE_NAME = "dojo-v2.0.1";
 const SHELL = [
   "./",
   "./index.html",

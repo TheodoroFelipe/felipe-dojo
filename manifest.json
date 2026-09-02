@@ -1,6 +1,6 @@
 {
-  "name": "Showcase Dojo · Felipe",
-  "short_name": "Dojo",
+  "name": "Meu Dojo",
+  "short_name": "Meu Dojo",
   "description": "App gamificado de treino e dieta com tema dojo japonês",
   "start_url": "./",
   "scope": "./",

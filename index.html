@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Dojo">
-<title>武 SHOWCASE DOJO</title>
+<title>武 MEU DOJO</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
@@ -394,7 +394,7 @@
     <div class="hinomaru"></div>
     <div class="brand-text">
       <span class="kanji">武 道 場</span>
-      <h1 class="title">SHOWCASE DOJO</h1>
+      <h1 class="title">MEU DOJO</h1>
     </div>
   </div>
 
@@ -451,7 +451,7 @@
       <div class="hinomaru"></div>
       <div class="brand-text">
         <span class="kanji">武 道 場</span>
-        <h1 class="title">SHOWCASE DOJO</h1>
+        <h1 class="title">MEU DOJO</h1>
         <span class="sub" id="headerUser">Senshi Profile</span>
       </div>
     </div>
@@ -831,7 +831,7 @@
       <span class="card-jp">情 報</span>
       <h3 class="card-title" style="margin-bottom:6px">ℹ SOBRE</h3>
       <p style="font-size:12px;color:var(--ink-soft);line-height:1.6">
-        <strong>Showcase Dojo</strong> v2.0<br>
+        <strong>Meu Dojo</strong> v2.0<br>
         App gamificado de treino e dieta com tema dojo japonês.<br>
         <span id="aboutUser">—</span> · XSHOWCASE TEAM<br>
         <span style="color:var(--ink-mute)">Abre offline · gravar dados exige conexão · conta sincroniza entre dispositivos</span>
@@ -848,7 +848,7 @@
 
   <div class="footer">
     <span class="jp">道 場</span>
-    Showcase Dojo · <span id="footerUser">—</span> · v2.0 PWA
+    Meu Dojo · <span id="footerUser">—</span> · v2.0 PWA
   </div>
 </div>
 
@@ -1437,7 +1437,7 @@ function buildExportPayload(){
   const data = filterByPeriod(exportPeriod);
   return {
     _meta: {
-      app: "Showcase Dojo",
+      app: "Meu Dojo",
       version: "1.1",
       exportedAt: new Date().toISOString(),
       user: DISPLAY_NAME,
@@ -1467,7 +1467,7 @@ document.getElementById('shareJson').addEventListener('click', async ()=>{
   const file = new File([blob], `dojo-${exportPeriod}.json`, {type:"application/json"});
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try {
-      await navigator.share({files:[file], title:"Dojo · Backup", text:"Meu progresso no Showcase Dojo"});
+      await navigator.share({files:[file], title:"Dojo · Backup", text:"Meu progresso no Meu Dojo"});
       toast("Compartilhado!","JSON enviado","ok");
     } catch(e){ if(e.name!=="AbortError") toast("Erro","Não foi possível compartilhar"); }
   } else {
@@ -1565,7 +1565,7 @@ function buildReport(type){
   const fromFmt = fmtDateLong(from), toFmt = fmtDateLong(today);
   const rank = currentRank(S.xp);
 
-  let out = `⛩  SHOWCASE DOJO  ·  ${DISPLAY_NAME.toUpperCase()}
+  let out = `⛩  MEU DOJO  ·  ${DISPLAY_NAME.toUpperCase()}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📊 ${label}
@@ -1701,7 +1701,7 @@ function drawCard(){
   ctx.textAlign = "center";
   let y = hinoY + hinoR + (cardFormat==='story' ? 90 : 70);
   ctx.font = `bold ${cardFormat==='story'?64:50}px Arial, sans-serif`;
-  ctx.fillText("SHOWCASE DOJO", W/2, y);
+  ctx.fillText("MEU DOJO", W/2, y);
 
   ctx.fillStyle = "#8a8a8a";
   ctx.font = `${cardFormat==='story'?28:22}px Arial, sans-serif`;
@@ -1885,7 +1885,7 @@ document.getElementById('shareCard').addEventListener('click', async ()=>{
     const file = new File([blob], `dojo-card-${cardContent}.png`, {type:"image/png"});
     if(navigator.canShare && navigator.canShare({files:[file]})){
       try {
-        await navigator.share({files:[file], title:"Showcase Dojo", text:"Meu progresso! 💪"});
+        await navigator.share({files:[file], title:"Meu Dojo", text:"Meu progresso! 💪"});
         toast("Compartilhado!","","ok");
       } catch(e){ if(e.name!=="AbortError") toast("Erro","Cancelado"); }
     } else {

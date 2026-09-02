@@ -1,4 +1,4 @@
-# 武 Showcase Dojo
+# 武 Meu Dojo
 
 Aplicação PWA gamificada para acompanhamento de treino, dieta e evolução física, com tema dojo japonês. Multi-usuário, com conta e dados sincronizados via Supabase.
 
