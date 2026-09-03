@@ -2095,6 +2095,8 @@ function setupInstallInstructions(){
 }
 
 /* ============ ROTINA DE TREINO — EDIÇÃO ============ */
+const WEEKDAY_LABELS = ['SEGUNDA','TERÇA','QUARTA','QUINTA','SEXTA','SÁBADO','DOMINGO'];
+
 function buildRoutineEditor(){
   const dayList = document.getElementById('dayEditList');
   dayList.innerHTML = S.trainingDays.map((d,i)=>`
@@ -2103,7 +2105,10 @@ function buildRoutineEditor(){
         <button class="check-btn" data-day-up="${d.id}" ${i===0?'disabled':''}>↑</button>
         <button class="check-btn" data-day-down="${d.id}" ${i===S.trainingDays.length-1?'disabled':''}>↓</button>
       </div>
-      <input type="text" class="load-input" style="width:100%;text-align:left" value="${d.title.replace(/"/g,'&quot;')}" data-day-rename="${d.id}">
+      <div>
+        <div style="font-size:10px;color:var(--ink-mute);letter-spacing:.08em;margin-bottom:3px">${WEEKDAY_LABELS[i] || 'SEM DIA FIXO'}</div>
+        <input type="text" class="load-input" style="width:100%;text-align:left" value="${d.title.replace(/"/g,'&quot;')}" data-day-rename="${d.id}">
+      </div>
       <button class="btn-secondary" data-day-select="${d.id}">${S.selectedDayId===d.id?'✓ SELECIONADO':'Selecionar'}</button>
       <button class="btn-danger" data-day-archive="${d.id}">Arquivar</button>
     </div>`).join('') || `<p style="color:var(--ink-mute);font-size:12px">Nenhum dia ainda — crie um abaixo.</p>`;
@@ -2228,8 +2233,23 @@ document.getElementById('addExerciseBtn').addEventListener('click', async ()=>{
   } catch(err){ toast("Erro ao criar exercício", err.message || "Verifique sua conexão"); }
 });
 
+/* ============ SYNC DIA DA SEMANA ============
+   Mapeia a rotina automaticamente pro dia da semana atual: posição 1 da
+   rotina = segunda, posição 2 = terça, ... Domingo (ou dias além do
+   tamanho da rotina, se ela tiver menos de 7) não força troca — fica
+   como descanso, mantendo o último dia selecionado. */
+function syncSelectedDayToWeekday(){
+  const dow = (new Date().getDay() + 6) % 7; // segunda=0 ... domingo=6
+  const match = S.trainingDays[dow];
+  if(match && S.selectedDayId !== match.id){
+    S.selectedDayId = match.id;
+    DB.setSelectedDay(match.id).catch(()=>{});
+  }
+}
+
 /* ============ INIT ============ */
 function initAll(){
+  syncSelectedDayToWeekday();
   refreshHeader();
   buildHome();
   buildDayTabs();
