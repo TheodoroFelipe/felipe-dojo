@@ -64,7 +64,15 @@
   .brand-text .title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.04em;line-height:1;margin-top:4px}
   .brand-text .sub{font-size:11px;color:var(--ink-mute);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
 
+  .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .header-stats{display:flex;gap:8px;flex-wrap:wrap}
+  .icon-btn{
+    width:38px;height:38px;flex:none;border-radius:50%;
+    background:var(--bg-paper);border:1px solid var(--line);cursor:pointer;
+    font-size:16px;display:flex;align-items:center;justify-content:center;
+    transition:background .2s,border-color .2s;
+  }
+  .icon-btn:hover{background:var(--ink);border-color:var(--ink)}
   .h-stat{
     background:var(--bg-paper);border:1px solid var(--line);padding:8px 14px;border-radius:2px;
     display:flex;align-items:center;gap:10px;
@@ -455,10 +463,13 @@
         <span class="sub" id="headerUser">Senshi Profile</span>
       </div>
     </div>
-    <div class="header-stats">
-      <div class="h-stat lvl"><div><div class="lbl">Rank</div><div class="val" id="hRank">—</div></div></div>
-      <div class="h-stat"><div><div class="lbl">XP</div><div class="val" id="hXP">0</div></div></div>
-      <div class="h-stat streak"><div><div class="lbl">Streak</div><div class="val" id="hStreak">0🔥</div></div></div>
+    <div class="header-right">
+      <div class="header-stats">
+        <div class="h-stat lvl"><div><div class="lbl">Rank</div><div class="val" id="hRank">—</div></div></div>
+        <div class="h-stat"><div><div class="lbl">XP</div><div class="val" id="hXP">0</div></div></div>
+        <div class="h-stat streak"><div><div class="lbl">Streak</div><div class="val" id="hStreak">0🔥</div></div></div>
+      </div>
+      <button class="icon-btn" id="logoutIconBtn" title="Sair da conta" aria-label="Sair da conta">🚪</button>
     </div>
   </header>
 
@@ -2307,10 +2318,12 @@ document.getElementById('resetPasswordForm').addEventListener('submit', async e=
   } catch(err){ toast("Erro ao atualizar senha", err.message || "Tente novamente"); }
 });
 
-document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+async function doLogout(){
   if(!confirm("Sair da conta?")) return;
   await sb.auth.signOut();
-});
+}
+document.getElementById('logoutBtn').addEventListener('click', doLogout);
+document.getElementById('logoutIconBtn').addEventListener('click', doLogout);
 
 // Importação de um backup local antigo (pré-contas), formato chaveado por
 // NOME de exercício. Reaproveita o merge já existente, mas resolve cada
@@ -2438,12 +2451,25 @@ sb.auth.onAuthStateChange((event, session) => {
   }
 });
 
-/* ============ SERVICE WORKER ============ */
+/* ============ SERVICE WORKER ============
+   O SW ativa versões novas imediatamente (skipWaiting + clients.claim),
+   mas uma aba já aberta continua rodando o HTML/JS antigo em memória até
+   recarregar. Sem isso, login/logout (ou qualquer ação) nessa aba antiga
+   pode chamar código desatualizado contra um schema/RPC que já mudou no
+   Supabase — foi a causa de um erro real de "carregar dados" após deploy.
+   Recarregar uma vez quando o novo SW assume resolve. */
 if("serviceWorker" in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js')
       .then(reg=>console.log('SW registered:', reg.scope))
       .catch(err=>console.warn('SW failed:', err));
+  });
+
+  let swRefreshed = false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(swRefreshed) return;
+    swRefreshed = true;
+    location.reload();
   });
 }
 </script>
