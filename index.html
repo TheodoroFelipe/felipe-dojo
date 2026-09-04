@@ -2258,9 +2258,18 @@ function setupInstallInstructions(){
   const ua = navigator.userAgent;
   const isIOS = /iPhone|iPad|iPod/i.test(ua);
   const isAndroid = /Android/i.test(ua);
+  // Navegador embutido de outro app (Instagram, WhatsApp, TikTok, Facebook, etc.) —
+  // esses WebViews bloqueiam a instalação de PWA por design, não tem como instalar de dentro deles.
+  const isInAppBrowser = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Line\/|musical_ly|TikTok|BytedanceWebview|Twitter|Pinterest|LinkedInApp|MicroMessenger|Snapchat/i.test(ua);
 
   if(isStandalone){
     el.innerHTML = `✅ <strong>App já instalado.</strong> Você está usando o Dojo como aplicativo nativo.`;
+  } else if(isInAppBrowser){
+    el.innerHTML = `⚠️ <strong>Você abriu o link de dentro de outro app</strong> (Instagram, WhatsApp, TikTok etc.) — esse navegador embutido não permite instalar PWA, é uma limitação do app, não do Dojo.<ol style="margin-left:18px;margin-top:6px">
+      <li>Toque no menu <strong>⋮</strong> ou <strong>•••</strong> no canto (geralmente superior direito) desse navegador</li>
+      <li>Escolha <strong>"Abrir no Chrome"</strong> ou <strong>"Abrir no navegador"</strong></li>
+      <li>Com o Dojo aberto no Chrome (ou Safari, no iPhone), repita o passo de instalar</li>
+    </ol>`;
   } else if(isIOS){
     el.innerHTML = `<strong>iPhone/iPad (Safari):</strong><ol style="margin-left:18px;margin-top:6px">
       <li>Toque no botão <strong>Compartilhar</strong> (ícone de quadrado com seta)</li>
