@@ -67,12 +67,14 @@
   .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .header-stats{display:flex;gap:8px;flex-wrap:wrap}
   .icon-btn{
-    width:38px;height:38px;flex:none;border-radius:50%;
+    height:38px;flex:none;border-radius:2px;padding:0 14px;gap:8px;
     background:var(--bg-paper);border:1px solid var(--line);cursor:pointer;
     font-size:16px;display:flex;align-items:center;justify-content:center;
-    transition:background .2s,border-color .2s;
+    transition:background .2s,border-color .2s,color .2s;
   }
+  .icon-btn .lbl-text{font-family:'Bebas Neue';font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
   .icon-btn:hover{background:var(--ink);border-color:var(--ink)}
+  .icon-btn:hover .lbl-text{color:#fff}
   .h-stat{
     background:var(--bg-paper);border:1px solid var(--line);padding:8px 14px;border-radius:2px;
     display:flex;align-items:center;gap:10px;
@@ -469,7 +471,7 @@
         <div class="h-stat"><div><div class="lbl">XP</div><div class="val" id="hXP">0</div></div></div>
         <div class="h-stat streak"><div><div class="lbl">Streak</div><div class="val" id="hStreak">0🔥</div></div></div>
       </div>
-      <button class="icon-btn" id="logoutIconBtn" title="Sair da conta" aria-label="Sair da conta">🚪</button>
+      <button class="icon-btn" id="logoutIconBtn" title="Sair da conta" aria-label="Sair da conta">🚪<span class="lbl-text">SAIR DA CONTA</span></button>
     </div>
   </header>
 
@@ -723,7 +725,8 @@
 
       <label style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;display:block;margin-bottom:8px">FORMATO</label>
       <div class="period-select" id="cardFormat">
-        <button class="period-btn active" data-fmt="square">⬛ Quadrado 1:1 (Feed)</button>
+        <button class="period-btn active" data-fmt="square">⬛ Quadrado 1:1</button>
+        <button class="period-btn" data-fmt="post">📷 Feed 4:5</button>
         <button class="period-btn" data-fmt="story">📱 Stories 9:16</button>
       </div>
 
@@ -732,10 +735,12 @@
         <button class="period-btn active" data-c="weekly">Resumo semanal</button>
         <button class="period-btn" data-c="monthly">Resumo mensal</button>
         <button class="period-btn" data-c="prs">Top PRs</button>
+        <button class="period-btn" data-c="achievements">🏅 Conquistas</button>
       </div>
 
+      <p style="font-size:11px;color:var(--ink-mute);margin-bottom:10px">A prévia atualiza sozinha ao trocar as opções acima.</p>
       <div class="btn-row">
-        <button class="btn-primary" id="genCard">🎨 GERAR CARD</button>
+        <button class="btn-primary" id="genCard">🔄 ATUALIZAR CARD</button>
         <button class="btn-secondary" id="downloadCard" disabled>⬇ BAIXAR PNG</button>
         <button class="btn-secondary" id="shareCard" disabled>📤 COMPARTILHAR</button>
       </div>
@@ -1373,6 +1378,7 @@ document.querySelectorAll('.tab').forEach(t=>{
     document.getElementById('panel-'+t.dataset.tab).classList.add('active');
     if(t.dataset.tab==='evolucao') setTimeout(buildChart,80);
     if(t.dataset.tab==='config') refreshNotifStatus();
+    if(t.dataset.tab==='compartilhar' && S) refreshCardPreview();
   });
 });
 
@@ -1393,8 +1399,8 @@ function bindToggleGroup(containerId, attrName, callback){
   });
 }
 bindToggleGroup('exportPeriod','p',v=>exportPeriod=v);
-bindToggleGroup('cardFormat','fmt',v=>{cardFormat=v;});
-bindToggleGroup('cardContent','c',v=>{cardContent=v;});
+bindToggleGroup('cardFormat','fmt',v=>{cardFormat=v; refreshCardPreview();});
+bindToggleGroup('cardContent','c',v=>{cardContent=v; refreshCardPreview();});
 document.querySelectorAll('[data-rep]').forEach(b=>{
   b.addEventListener('click',e=>{
     document.querySelectorAll('[data-rep]').forEach(x=>x.classList.remove('active'));
@@ -1664,12 +1670,48 @@ document.getElementById('shareReport').addEventListener('click', async ()=>{
 });
 
 /* Card PNG generation */
-function drawCard(){
+function periodRange(kind, offset){
+  // kind: 'weekly'|'monthly' · offset: 0 = período atual, -1 = período anterior
+  const t = new Date();
+  if(kind==='weekly'){
+    const dow = t.getDay();
+    const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7) + offset*7);
+    const from = monday.toISOString().slice(0,10);
+    if(offset===0) return {from, to: todayStr()};
+    const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+    return {from, to: sunday.toISOString().slice(0,10)};
+  }
+  const y = t.getFullYear(), m = t.getMonth() + offset;
+  const first = new Date(y, m, 1);
+  const from = `${first.getFullYear()}-${String(first.getMonth()+1).padStart(2,'0')}-01`;
+  if(offset===0) return {from, to: todayStr()};
+  const last = new Date(y, m+1, 0);
+  return {from, to: `${last.getFullYear()}-${String(last.getMonth()+1).padStart(2,'0')}-${String(last.getDate()).padStart(2,'0')}`};
+}
+
+function deltaBadge(n, suffix){
+  if(n===null || n===undefined || isNaN(n)) return null;
+  const num = Number(n);
+  if(num===0) return {text:"= igual ao período anterior", color:"#8a8a8a"};
+  const arrow = num>0 ? "▲" : "▼";
+  const color = num>0 ? "#6b8e4e" : "#c8102e";
+  return {text:`${arrow} ${num>0?"+":""}${n}${suffix||""} vs anterior`, color};
+}
+
+async function drawCard(){
   const canvas = document.getElementById('cardCanvas');
   const ctx = canvas.getContext('2d');
-  const W = cardFormat==='story' ? 1080 : 1080;
-  const H = cardFormat==='story' ? 1920 : 1080;
+  const DIMS = { square:[1080,1080], post:[1080,1350], story:[1080,1920] };
+  const SCALE = { square:1, post:1.1, story:1.28 };
+  const [W,H] = DIMS[cardFormat] || DIMS.square;
+  const sc = SCALE[cardFormat] || 1;
+  const scY = H/1080; // ritmo vertical: acompanha a altura real do canvas p/ não sobrar vazio em formatos altos
+  const px = n => Math.round(n*sc);   // tamanho de fonte/ícone/caixa
+  const py = n => Math.round(n*scY);  // espaçamento/posição vertical
   canvas.width = W; canvas.height = H;
+  if(document.fonts && document.fonts.ready){
+    try{ await document.fonts.ready; }catch(e){}
+  }
 
   // Background
   const grad = ctx.createLinearGradient(0,0,W,H);
@@ -1690,120 +1732,179 @@ function drawCard(){
 
   // Decorative kanji watermark
   ctx.fillStyle = "rgba(200,16,46,0.06)";
-  ctx.font = `900 ${cardFormat==='story'?900:600}px 'Noto Serif JP', serif`;
+  ctx.font = `900 ${px(600)}px 'Noto Serif JP', serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("武", W/2, H*0.55);
 
   // Hinomaru on top
-  const hinoY = cardFormat==='story' ? 200 : 130;
-  const hinoR = cardFormat==='story' ? 70 : 55;
+  const hinoY = py(130);
+  const hinoR = px(55);
   ctx.fillStyle = "#c8102e";
   ctx.beginPath();
   ctx.arc(W/2, hinoY, hinoR, 0, Math.PI*2);
   ctx.fill();
   ctx.fillStyle = "#fff";
-  ctx.font = `900 ${hinoR*1.1}px 'Noto Serif JP', serif`;
+  ctx.font = `900 ${Math.round(hinoR*1.1)}px 'Noto Serif JP', serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText("武", W/2, hinoY+2);
 
   // Title
   ctx.fillStyle = "#1a1a1a";
-  ctx.textAlign = "center";
-  let y = hinoY + hinoR + (cardFormat==='story' ? 90 : 70);
-  ctx.font = `bold ${cardFormat==='story'?64:50}px Arial, sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  let y = hinoY + hinoR + py(70);
+  ctx.font = `${px(50)}px 'Bebas Neue', Arial, sans-serif`;
   ctx.fillText("MEU DOJO", W/2, y);
 
   ctx.fillStyle = "#8a8a8a";
-  ctx.font = `${cardFormat==='story'?28:22}px Arial, sans-serif`;
-  y += cardFormat==='story' ? 40 : 30;
+  ctx.font = `${px(20)}px 'Inter', Arial, sans-serif`;
+  y += py(28);
   ctx.fillText(DISPLAY_NAME.toUpperCase() + " · MEU DOJO", W/2, y);
 
+  // Rank / faixa badge
+  const rank = currentRank((S && S.xp) || 0);
+  y += py(42);
+  ctx.fillStyle = "#c9a227";
+  ctx.font = `${px(24)}px 'Bebas Neue', Arial, sans-serif`;
+  ctx.fillText(`🥋 ${rank.ptbr} · ${(S && S.xp) || 0} XP`, W/2, y);
+
   // Period label
-  y += cardFormat==='story' ? 80 : 60;
+  y += py(56);
   let periodLabel = "";
   if(cardContent==='weekly') periodLabel = "RESUMO SEMANAL";
   else if(cardContent==='monthly') periodLabel = "RESUMO MENSAL";
+  else if(cardContent==='achievements') periodLabel = "CONQUISTAS";
   else periodLabel = "TOP RECORDES";
 
   ctx.fillStyle = "#c8102e";
-  ctx.font = `bold ${cardFormat==='story'?28:22}px Arial`;
+  ctx.font = `${px(24)}px 'Bebas Neue', Arial`;
   ctx.fillText(periodLabel, W/2, y);
 
   // Stats grid
-  y += cardFormat==='story' ? 80 : 60;
-
-  const t = new Date();
-  let from = todayStr();
-  if(cardContent==='weekly'){
-    const dow = t.getDay();
-    const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7));
-    from = monday.toISOString().slice(0,10);
-  } else if(cardContent==='monthly'){
-    from = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;
-  }
-  const today = todayStr();
-  const inRange = d => d >= from && d <= today;
+  y += py(60);
 
   if(cardContent==='prs'){
-    // Top PRs list
-    const prs = Object.entries(S.PRs).sort((a,b)=>b[1].weight - a[1].weight).slice(0, cardFormat==='story'?8:6);
-    const itemH = cardFormat==='story' ? 110 : 85;
+    // Top PRs list (recordes de todos os tempos, sem filtro de período)
+    const prsMax = cardFormat==='story' ? 8 : (cardFormat==='post' ? 7 : 6);
+    const prs = Object.entries(S.PRs).sort((a,b)=>b[1].weight - a[1].weight).slice(0, prsMax);
+    const itemH = py(85);
     prs.forEach(([exId,pr], i)=>{
       const name = exerciseName(exId);
-      const py = y + i*itemH;
+      const rowY = y + i*itemH;
       // Number badge
       ctx.fillStyle = i===0 ? "#c9a227" : (i===1 ? "#c0c0c0" : (i===2 ? "#cd7f32" : "#1a1a1a"));
       ctx.beginPath();
-      ctx.arc(W*0.15, py+itemH/2-15, cardFormat==='story'?32:26, 0, Math.PI*2);
+      ctx.arc(W*0.15, rowY+itemH/2-15, px(26), 0, Math.PI*2);
       ctx.fill();
       ctx.fillStyle = "#fff";
-      ctx.font = `bold ${cardFormat==='story'?32:26}px Arial`;
+      ctx.font = `bold ${px(26)}px 'Bebas Neue', Arial`;
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(String(i+1), W*0.15, py+itemH/2-15);
+      ctx.fillText(String(i+1), W*0.15, rowY+itemH/2-15);
       // Name
       ctx.fillStyle = "#1a1a1a";
-      ctx.font = `bold ${cardFormat==='story'?34:26}px Arial`;
+      ctx.font = `${px(26)}px 'Bebas Neue', Arial`;
       ctx.textAlign = "left"; ctx.textBaseline = "middle";
       const truncated = name.length > 28 ? name.slice(0,26)+"..." : name;
-      ctx.fillText(truncated, W*0.22, py+itemH/2-25);
+      ctx.fillText(truncated, W*0.22, rowY+itemH/2-25);
       ctx.fillStyle = "#8a8a8a";
-      ctx.font = `${cardFormat==='story'?20:16}px Arial`;
-      ctx.fillText(fmtDate(pr.date), W*0.22, py+itemH/2+5);
+      ctx.font = `${px(16)}px 'Inter', Arial`;
+      ctx.fillText(fmtDate(pr.date), W*0.22, rowY+itemH/2+5);
       // Weight
       ctx.fillStyle = "#c8102e";
-      ctx.font = `bold ${cardFormat==='story'?44:34}px Arial`;
+      ctx.font = `${px(34)}px 'Bebas Neue', Arial`;
       ctx.textAlign = "right";
-      ctx.fillText(pr.weight + " kg", W*0.92, py+itemH/2-15);
+      ctx.fillText(pr.weight + " kg", W*0.92, rowY+itemH/2-15);
     });
     if(!prs.length){
       ctx.fillStyle = "#8a8a8a";
-      ctx.font = `${cardFormat==='story'?28:22}px Arial`;
-      ctx.textAlign = "center";
+      ctx.font = `${px(22)}px 'Inter', Arial`;
+      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.fillText("Nenhum PR ainda", W/2, y+50);
     }
+  } else if(cardContent==='achievements'){
+    // Vitrine de conquistas desbloqueadas (acervo geral, sem filtro de período)
+    const unlocked = ACHIEVEMENTS.filter(a => ((S && S.unlocked) || []).includes(a.id));
+    ctx.fillStyle = "#1a1a1a";
+    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+    ctx.font = `${px(70)}px 'Bebas Neue', Arial`;
+    ctx.fillText(`${unlocked.length} / ${ACHIEVEMENTS.length}`, W/2, y+px(60));
+    ctx.fillStyle = "#8a8a8a";
+    ctx.font = `${px(18)}px 'Inter', Arial`;
+    ctx.fillText("MEDALHAS DESBLOQUEADAS", W/2, y+px(94));
+
+    y += py(150);
+    if(unlocked.length){
+      const cols = 3;
+      const cellW = W/cols;
+      const cellH = py(170);
+      const maxRows = Math.max(1, Math.floor((H - y - py(90)) / cellH));
+      const shown = unlocked.slice(0, cols*maxRows);
+      shown.forEach((a,i)=>{
+        const cx = cellW*(i%cols) + cellW/2;
+        const cy = y + Math.floor(i/cols)*cellH;
+        ctx.fillStyle = "#c9a227";
+        ctx.beginPath(); ctx.arc(cx, cy+px(45), px(44), 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.font = `${px(40)}px Arial`;
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(a.icon, cx, cy+px(46));
+        ctx.fillStyle = "#1a1a1a";
+        ctx.font = `${px(15)}px 'Bebas Neue', Arial`;
+        ctx.textBaseline = "alphabetic";
+        const name = a.name.length > 15 ? a.name.slice(0,13)+"…" : a.name;
+        ctx.fillText(name, cx, cy+px(108));
+      });
+      if(unlocked.length > shown.length){
+        ctx.fillStyle = "#8a8a8a";
+        ctx.font = `${px(16)}px 'Inter', Arial`;
+        ctx.textAlign = "center";
+        ctx.fillText(`+ ${unlocked.length - shown.length} outras`, W/2, y + maxRows*cellH + px(24));
+      }
+    } else {
+      ctx.fillStyle = "#8a8a8a";
+      ctx.font = `${px(22)}px 'Inter', Arial`;
+      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      ctx.fillText("Nenhuma conquista ainda — comece hoje!", W/2, y+40);
+    }
   } else {
-    // Stats
-    const sessions = Object.entries(S.daySessions).filter(([k,v])=>inRange(k) && v.finished);
-    const meals = Object.entries(S.mealsByDay).filter(([k])=>inRange(k));
-    const totalMeals = meals.reduce((acc,[,v])=>acc+Object.keys(v).length, 0);
-    const expectedMeals = meals.length * 5;
-    const adherence = expectedMeals ? Math.round(totalMeals/expectedMeals*100) : 0;
-    const weighings = S.history.filter(h=>inRange(h.date));
+    // Stats semanais/mensais, comparados ao período anterior equivalente
+    const cur = periodRange(cardContent, 0);
+    const prev = periodRange(cardContent, -1);
+    const inCur = d => d >= cur.from && d <= cur.to;
+    const inPrev = d => d >= prev.from && d <= prev.to;
+
+    function statsFor(inFn){
+      const sessions = Object.entries(S.daySessions).filter(([k,v])=>inFn(k) && v.finished);
+      const meals = Object.entries(S.mealsByDay).filter(([k])=>inFn(k));
+      const totalMeals = meals.reduce((acc,[,v])=>acc+Object.keys(v).length, 0);
+      const expectedMeals = meals.length * 5;
+      return { sessions: sessions.length, adherence: expectedMeals ? Math.round(totalMeals/expectedMeals*100) : 0, hasMealData: expectedMeals>0 };
+    }
+    const curStats = statsFor(inCur);
+    const prevStats = statsFor(inPrev);
+
+    const weighings = S.history.filter(h=>inCur(h.date));
     const lastW = weighings[weighings.length-1];
     const firstW = weighings[0];
     const wDelta = (firstW && lastW && firstW !== lastW) ? (lastW.weight - firstW.weight).toFixed(1) : null;
+    const prevWeighings = S.history.filter(h=>inPrev(h.date));
+    const prevLastW = prevWeighings[prevWeighings.length-1];
+    const wVsPrev = (lastW && prevLastW) ? (lastW.weight - prevLastW.weight).toFixed(1) : null;
+
+    const streakDelta = S.bestStreak > S.currentStreak
+      ? { text:`recorde: ${S.bestStreak}d`, color:"#8a8a8a" }
+      : (S.currentStreak>0 ? { text:"🏆 seu recorde!", color:"#c9a227" } : null);
 
     const stats = [
-      { label:"TREINOS", value: sessions.length, sub:"sessões" },
-      { label:"ADERÊNCIA", value: adherence+"%", sub:"refeições" },
-      { label:"PESO", value: lastW ? lastW.weight+"kg" : "—", sub: wDelta!==null ? ((wDelta>0?"+":"")+wDelta+" kg") : "atual" },
-      { label:"STREAK", value: S.currentStreak+"🔥", sub:"dias" },
+      { label:"TREINOS", value: curStats.sessions, sub:"sessões", delta: deltaBadge(curStats.sessions - prevStats.sessions, "") },
+      { label:"ADERÊNCIA", value: curStats.adherence+"%", sub:"refeições", delta: prevStats.hasMealData ? deltaBadge(curStats.adherence - prevStats.adherence, "%") : null },
+      { label:"PESO", value: lastW ? lastW.weight+"kg" : "—", sub: wDelta!==null ? ((wDelta>0?"+":"")+wDelta+" kg no período") : "sem registro", delta: deltaBadge(wVsPrev, "kg") },
+      { label:"STREAK", value: S.currentStreak+"🔥", sub:"dias seguidos", delta: streakDelta },
     ];
 
     const cellW = W*0.42;
-    const cellH = cardFormat==='story' ? 220 : 170;
-    const gap = cardFormat==='story' ? 40 : 30;
+    const cellH = py(190);
+    const gap = py(30);
     const startX = W/2 - cellW - gap/2;
 
     stats.forEach((s,i)=>{
@@ -1820,61 +1921,71 @@ function drawCard(){
       ctx.fillRect(cx, cy, cellW, 6);
       // Label
       ctx.fillStyle = "#8a8a8a";
-      ctx.font = `bold ${cardFormat==='story'?22:18}px Arial`;
+      ctx.font = `bold ${px(16)}px 'Inter', Arial`;
       ctx.textAlign = "left"; ctx.textBaseline = "top";
-      ctx.fillText(s.label, cx+20, cy+24);
+      ctx.fillText(s.label, cx+20, cy+22);
       // Value
       ctx.fillStyle = "#1a1a1a";
-      ctx.font = `bold ${cardFormat==='story'?80:62}px Arial`;
-      ctx.fillText(s.value, cx+20, cy+(cardFormat==='story'?60:50));
+      ctx.font = `${px(60)}px 'Bebas Neue', Arial`;
+      ctx.fillText(s.value, cx+20, cy+px(52));
       // Sub
       ctx.fillStyle = "#8a8a8a";
-      ctx.font = `${cardFormat==='story'?20:16}px Arial`;
-      ctx.fillText(s.sub, cx+20, cy+cellH-(cardFormat==='story'?40:32));
+      ctx.font = `${px(15)}px 'Inter', Arial`;
+      ctx.fillText(s.sub, cx+20, cy+cellH-px(46));
+      // Delta vs período anterior
+      if(s.delta){
+        ctx.fillStyle = s.delta.color;
+        ctx.font = `bold ${px(14)}px 'Inter', Arial`;
+        ctx.fillText(s.delta.text, cx+20, cy+cellH-px(22));
+      }
     });
 
     // PRs preview at bottom
-    const recentPRs = Object.entries(S.PRs).filter(([,p])=>inRange(p.date)).sort((a,b)=>b[1].date.localeCompare(a[1].date)).slice(0,3);
+    const recentPRs = Object.entries(S.PRs).filter(([,p])=>inCur(p.date)).sort((a,b)=>b[1].date.localeCompare(a[1].date)).slice(0,3);
     if(recentPRs.length){
-      let py = y + 2*(cellH+gap) + (cardFormat==='story'?40:30);
+      let rowY = y + 2*(cellH+gap) + py(30);
       ctx.fillStyle = "#c8102e";
-      ctx.font = `bold ${cardFormat==='story'?26:20}px Arial`;
-      ctx.textAlign = "center";
-      ctx.fillText("⚡ PRS RECENTES", W/2, py);
-      py += cardFormat==='story' ? 50 : 38;
+      ctx.font = `${px(20)}px 'Bebas Neue', Arial`;
+      ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      ctx.fillText("⚡ PRS RECENTES", W/2, rowY);
+      rowY += py(38);
       recentPRs.forEach(([exId,pr])=>{
         const name = exerciseName(exId);
         ctx.fillStyle = "#1a1a1a";
-        ctx.font = `${cardFormat==='story'?24:18}px Arial`;
+        ctx.font = `${px(18)}px 'Inter', Arial`;
         ctx.textAlign = "center";
         const truncated = name.length > 30 ? name.slice(0,28)+"..." : name;
-        ctx.fillText(`${truncated} · ${pr.weight} kg`, W/2, py);
-        py += cardFormat==='story' ? 38 : 28;
+        ctx.fillText(`${truncated} · ${pr.weight} kg`, W/2, rowY);
+        rowY += py(28);
       });
     }
   }
 
   // Footer
-  const footY = H - (cardFormat==='story' ? 80 : 60);
+  const footY = H - py(60);
   ctx.fillStyle = "#c8102e";
-  ctx.font = `bold ${cardFormat==='story'?22:16}px 'Noto Serif JP'`;
-  ctx.textAlign = "center";
+  ctx.font = `bold ${px(16)}px 'Noto Serif JP'`;
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   ctx.fillText("道 場 · 千里の道も一歩から", W/2, footY);
   ctx.fillStyle = "#8a8a8a";
-  ctx.font = `${cardFormat==='story'?18:14}px Arial`;
-  ctx.fillText(new Date().toLocaleDateString('pt-BR'), W/2, footY+(cardFormat==='story'?32:24));
+  ctx.font = `${px(14)}px 'Inter', Arial`;
+  ctx.fillText(new Date().toLocaleDateString('pt-BR'), W/2, footY+px(24));
 
   // Bottom bar
   ctx.fillStyle = "#c8102e";
   ctx.fillRect(0, H-12, W, 12);
 }
 
-document.getElementById('genCard').addEventListener('click',()=>{
-  drawCard();
+async function refreshCardPreview(){
+  await drawCard();
   document.getElementById('cardPreview').classList.remove('hidden');
   document.getElementById('downloadCard').disabled = false;
   document.getElementById('shareCard').disabled = false;
-  toast("Card gerado","Pronto para baixar ou compartilhar","ok");
+}
+
+document.getElementById('genCard').addEventListener('click', async ()=>{
+  await refreshCardPreview();
+  toast("Card atualizado","Pronto para baixar ou compartilhar","ok");
 });
 
 document.getElementById('downloadCard').addEventListener('click',()=>{
