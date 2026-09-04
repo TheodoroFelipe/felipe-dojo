@@ -738,6 +738,15 @@
         <button class="period-btn" data-c="achievements">🏅 Conquistas</button>
       </div>
 
+      <label style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-mute);font-weight:600;display:block;margin-bottom:8px">FOTO DE FUNDO (OPCIONAL)</label>
+      <div class="btn-row" style="align-items:center;margin-bottom:6px">
+        <button class="btn-secondary" id="pickCardBg">🖼️ ESCOLHER FOTO</button>
+        <button class="btn-secondary hidden" id="removeCardBg">✕ REMOVER FOTO</button>
+        <img id="cardBgThumb" class="hidden" style="width:38px;height:38px;object-fit:cover;border-radius:2px;border:1px solid var(--line)">
+      </div>
+      <input type="file" id="cardBgFile" accept="image/*" style="display:none">
+      <p style="font-size:11px;color:var(--ink-mute);margin-bottom:14px">Uma foto sua entra como fundo do card, com um véu escuro atrás do texto pra manter a legibilidade.</p>
+
       <p style="font-size:11px;color:var(--ink-mute);margin-bottom:10px">A prévia atualiza sozinha ao trocar as opções acima.</p>
       <div class="btn-row">
         <button class="btn-primary" id="genCard">🔄 ATUALIZAR CARD</button>
@@ -1388,6 +1397,8 @@ let reportType = 'week';
 let cardFormat = 'square';
 let cardContent = 'weekly';
 let importMode = 'merge';
+let cardBgImage = null;   // HTMLImageElement da foto de fundo escolhida (opcional)
+let cardBgObjectUrl = null;
 
 function bindToggleGroup(containerId, attrName, callback){
   document.getElementById(containerId).addEventListener('click', e=>{
@@ -1401,6 +1412,42 @@ function bindToggleGroup(containerId, attrName, callback){
 bindToggleGroup('exportPeriod','p',v=>exportPeriod=v);
 bindToggleGroup('cardFormat','fmt',v=>{cardFormat=v; refreshCardPreview();});
 bindToggleGroup('cardContent','c',v=>{cardContent=v; refreshCardPreview();});
+
+document.getElementById('pickCardBg').addEventListener('click', ()=>{
+  document.getElementById('cardBgFile').click();
+});
+
+document.getElementById('cardBgFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  e.target.value = ''; // permite escolher o mesmo arquivo de novo depois
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    toast("Arquivo inválido","Escolha uma imagem (JPG, PNG...)");
+    return;
+  }
+  if(cardBgObjectUrl) URL.revokeObjectURL(cardBgObjectUrl);
+  cardBgObjectUrl = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = async ()=>{
+    cardBgImage = img;
+    const thumb = document.getElementById('cardBgThumb');
+    thumb.src = cardBgObjectUrl;
+    thumb.classList.remove('hidden');
+    document.getElementById('removeCardBg').classList.remove('hidden');
+    await refreshCardPreview();
+    toast("Foto aplicada","Ela entra como fundo do card","ok");
+  };
+  img.onerror = ()=>{ toast("Erro ao carregar foto","Tente outra imagem"); };
+  img.src = cardBgObjectUrl;
+});
+
+document.getElementById('removeCardBg').addEventListener('click', async ()=>{
+  cardBgImage = null;
+  if(cardBgObjectUrl){ URL.revokeObjectURL(cardBgObjectUrl); cardBgObjectUrl = null; }
+  document.getElementById('cardBgThumb').classList.add('hidden');
+  document.getElementById('removeCardBg').classList.add('hidden');
+  await refreshCardPreview();
+});
 document.querySelectorAll('[data-rep]').forEach(b=>{
   b.addEventListener('click',e=>{
     document.querySelectorAll('[data-rep]').forEach(x=>x.classList.remove('active'));
@@ -1670,6 +1717,16 @@ document.getElementById('shareReport').addEventListener('click', async ()=>{
 });
 
 /* Card PNG generation */
+function drawCoverImage(ctx, img, W, H){
+  // Desenha a imagem cobrindo todo o canvas (equivalente a background-size:cover), centralizada
+  const ir = img.width / img.height;
+  const cr = W / H;
+  let sw, sh, sx, sy;
+  if(ir > cr){ sh = img.height; sw = sh*cr; sx = (img.width-sw)/2; sy = 0; }
+  else { sw = img.width; sh = sw/cr; sx = 0; sy = (img.height-sh)/2; }
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+}
+
 function periodRange(kind, offset){
   // kind: 'weekly'|'monthly' · offset: 0 = período atual, -1 = período anterior
   const t = new Date();
@@ -1713,29 +1770,45 @@ async function drawCard(){
     try{ await document.fonts.ready; }catch(e){}
   }
 
-  // Background
-  const grad = ctx.createLinearGradient(0,0,W,H);
-  grad.addColorStop(0,"#faf6ed"); grad.addColorStop(1,"#f0ebe0");
-  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+  const onPhoto = !!cardBgImage;
+  const cText = onPhoto ? "#ffffff" : "#1a1a1a"; // texto que fica direto sobre o fundo (fora dos cards)
+  const cMute = onPhoto ? "rgba(255,255,255,0.78)" : "#8a8a8a";
 
-  // Texture (subtle dots)
-  ctx.fillStyle = "rgba(26,26,26,0.02)";
-  for(let i=0;i<400;i++){
-    ctx.beginPath();
-    ctx.arc(Math.random()*W, Math.random()*H, 1.5, 0, Math.PI*2);
-    ctx.fill();
+  // Background
+  if(onPhoto){
+    drawCoverImage(ctx, cardBgImage, W, H);
+    const scrim = ctx.createLinearGradient(0,0,0,H);
+    scrim.addColorStop(0,   "rgba(10,8,6,0.6)");
+    scrim.addColorStop(0.28,"rgba(10,8,6,0.22)");
+    scrim.addColorStop(0.72,"rgba(10,8,6,0.22)");
+    scrim.addColorStop(1,   "rgba(10,8,6,0.62)");
+    ctx.fillStyle = scrim; ctx.fillRect(0,0,W,H);
+  } else {
+    const grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,"#faf6ed"); grad.addColorStop(1,"#f0ebe0");
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+
+    // Texture (subtle dots)
+    ctx.fillStyle = "rgba(26,26,26,0.02)";
+    for(let i=0;i<400;i++){
+      ctx.beginPath();
+      ctx.arc(Math.random()*W, Math.random()*H, 1.5, 0, Math.PI*2);
+      ctx.fill();
+    }
   }
 
   // Top bar
   ctx.fillStyle = "#c8102e";
   ctx.fillRect(0,0,W,12);
 
-  // Decorative kanji watermark
-  ctx.fillStyle = "rgba(200,16,46,0.06)";
-  ctx.font = `900 ${px(600)}px 'Noto Serif JP', serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("武", W/2, H*0.55);
+  // Decorative kanji watermark (só no fundo padrão — sobre foto vira ruído)
+  if(!onPhoto){
+    ctx.fillStyle = "rgba(200,16,46,0.06)";
+    ctx.font = `900 ${px(600)}px 'Noto Serif JP', serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("武", W/2, H*0.55);
+  }
 
   // Hinomaru on top
   const hinoY = py(130);
@@ -1750,13 +1823,13 @@ async function drawCard(){
   ctx.fillText("武", W/2, hinoY+2);
 
   // Title
-  ctx.fillStyle = "#1a1a1a";
+  ctx.fillStyle = cText;
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   let y = hinoY + hinoR + py(70);
   ctx.font = `${px(50)}px 'Bebas Neue', Arial, sans-serif`;
   ctx.fillText("MEU DOJO", W/2, y);
 
-  ctx.fillStyle = "#8a8a8a";
+  ctx.fillStyle = cMute;
   ctx.font = `${px(20)}px 'Inter', Arial, sans-serif`;
   y += py(28);
   ctx.fillText(DISPLAY_NAME.toUpperCase() + " · MEU DOJO", W/2, y);
@@ -1801,12 +1874,12 @@ async function drawCard(){
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillText(String(i+1), W*0.15, rowY+itemH/2-15);
       // Name
-      ctx.fillStyle = "#1a1a1a";
+      ctx.fillStyle = cText;
       ctx.font = `${px(26)}px 'Bebas Neue', Arial`;
       ctx.textAlign = "left"; ctx.textBaseline = "middle";
       const truncated = name.length > 28 ? name.slice(0,26)+"..." : name;
       ctx.fillText(truncated, W*0.22, rowY+itemH/2-25);
-      ctx.fillStyle = "#8a8a8a";
+      ctx.fillStyle = cMute;
       ctx.font = `${px(16)}px 'Inter', Arial`;
       ctx.fillText(fmtDate(pr.date), W*0.22, rowY+itemH/2+5);
       // Weight
@@ -1816,7 +1889,7 @@ async function drawCard(){
       ctx.fillText(pr.weight + " kg", W*0.92, rowY+itemH/2-15);
     });
     if(!prs.length){
-      ctx.fillStyle = "#8a8a8a";
+      ctx.fillStyle = cMute;
       ctx.font = `${px(22)}px 'Inter', Arial`;
       ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.fillText("Nenhum PR ainda", W/2, y+50);
@@ -1824,11 +1897,11 @@ async function drawCard(){
   } else if(cardContent==='achievements'){
     // Vitrine de conquistas desbloqueadas (acervo geral, sem filtro de período)
     const unlocked = ACHIEVEMENTS.filter(a => ((S && S.unlocked) || []).includes(a.id));
-    ctx.fillStyle = "#1a1a1a";
+    ctx.fillStyle = cText;
     ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
     ctx.font = `${px(70)}px 'Bebas Neue', Arial`;
     ctx.fillText(`${unlocked.length} / ${ACHIEVEMENTS.length}`, W/2, y+px(60));
-    ctx.fillStyle = "#8a8a8a";
+    ctx.fillStyle = cMute;
     ctx.font = `${px(18)}px 'Inter', Arial`;
     ctx.fillText("MEDALHAS DESBLOQUEADAS", W/2, y+px(94));
 
@@ -1848,20 +1921,20 @@ async function drawCard(){
         ctx.font = `${px(40)}px Arial`;
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(a.icon, cx, cy+px(46));
-        ctx.fillStyle = "#1a1a1a";
+        ctx.fillStyle = cText;
         ctx.font = `${px(15)}px 'Bebas Neue', Arial`;
         ctx.textBaseline = "alphabetic";
         const name = a.name.length > 15 ? a.name.slice(0,13)+"…" : a.name;
         ctx.fillText(name, cx, cy+px(108));
       });
       if(unlocked.length > shown.length){
-        ctx.fillStyle = "#8a8a8a";
+        ctx.fillStyle = cMute;
         ctx.font = `${px(16)}px 'Inter', Arial`;
         ctx.textAlign = "center";
         ctx.fillText(`+ ${unlocked.length - shown.length} outras`, W/2, y + maxRows*cellH + px(24));
       }
     } else {
-      ctx.fillStyle = "#8a8a8a";
+      ctx.fillStyle = cMute;
       ctx.font = `${px(22)}px 'Inter', Arial`;
       ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.fillText("Nenhuma conquista ainda — comece hoje!", W/2, y+40);
@@ -1951,7 +2024,7 @@ async function drawCard(){
       rowY += py(38);
       recentPRs.forEach(([exId,pr])=>{
         const name = exerciseName(exId);
-        ctx.fillStyle = "#1a1a1a";
+        ctx.fillStyle = cText;
         ctx.font = `${px(18)}px 'Inter', Arial`;
         ctx.textAlign = "center";
         const truncated = name.length > 30 ? name.slice(0,28)+"..." : name;
@@ -1967,7 +2040,7 @@ async function drawCard(){
   ctx.font = `bold ${px(16)}px 'Noto Serif JP'`;
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   ctx.fillText("道 場 · 千里の道も一歩から", W/2, footY);
-  ctx.fillStyle = "#8a8a8a";
+  ctx.fillStyle = cMute;
   ctx.font = `${px(14)}px 'Inter', Arial`;
   ctx.fillText(new Date().toLocaleDateString('pt-BR'), W/2, footY+px(24));
 
