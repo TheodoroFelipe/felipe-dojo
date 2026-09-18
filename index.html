@@ -965,7 +965,10 @@ function exerciseName(id){
   return (S && S.exerciseNames && S.exerciseNames[id]) || "Exercício removido";
 }
 
-function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+// Data local (YYYY-MM-DD). Nunca usar toISOString() para "hoje" — ele converte
+// para UTC e, no fuso do Brasil (UTC-3), já vira o dia seguinte a partir das ~21h.
+function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function todayStr(){ return dateStr(new Date()); }
 function fmtDate(s){ const d=new Date(s+"T12:00:00"); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
 function fmtDateLong(s){ const d=new Date(s+"T12:00:00"); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); }
 
@@ -1036,7 +1039,7 @@ function buildWeekStrip(){
   const range = [];
   for(let i=0;i<7;i++){
     const d = new Date(monday); d.setDate(monday.getDate()+i);
-    const ds = d.toISOString().slice(0,10);
+    const ds = dateStr(d);
     const session = S.daySessions[ds];
     const meals = S.mealsByDay[ds] || {};
     const tDone = session && session.finished;
@@ -1182,7 +1185,7 @@ document.getElementById('finishTraining').addEventListener('click', async ()=>{
   }
   if(session.finished){ toast("Já encerrado","Esse treino já foi encerrado hoje."); return;}
   const yest = new Date(); yest.setDate(yest.getDate()-1);
-  const ys = yest.toISOString().slice(0,10);
+  const ys = dateStr(yest);
   try {
     const profile = await DB.finishTraining(t, ys);
     session.finished = true;
@@ -1475,15 +1478,15 @@ function filterByPeriod(period){
   if(period==='week'){
     const dow = t.getDay();
     const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7));
-    from = monday.toISOString().slice(0,10);
+    from = dateStr(monday);
   } else if(period==='month'){
     from = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;
   } else if(period==='last7'){
     const d = new Date(t); d.setDate(t.getDate()-7);
-    from = d.toISOString().slice(0,10);
+    from = dateStr(d);
   } else if(period==='last30'){
     const d = new Date(t); d.setDate(t.getDate()-30);
-    from = d.toISOString().slice(0,10);
+    from = dateStr(d);
   }
 
   if(!from) return JSON.parse(JSON.stringify(S));
@@ -1517,7 +1520,7 @@ document.getElementById('downloadJson').addEventListener('click',()=>{
   const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const dt = new Date().toISOString().slice(0,10);
+  const dt = todayStr();
   a.href = url;
   a.download = `dojo-${exportPeriod}-${dt}.json`;
   a.click();
@@ -1605,7 +1608,7 @@ function buildReport(type){
   if(type==='week'){
     const dow = t.getDay();
     const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7));
-    from = monday.toISOString().slice(0,10);
+    from = dateStr(monday);
     label = "RELATÓRIO SEMANAL";
   } else {
     from = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`;
@@ -1733,10 +1736,10 @@ function periodRange(kind, offset){
   if(kind==='weekly'){
     const dow = t.getDay();
     const monday = new Date(t); monday.setDate(t.getDate() - ((dow+6)%7) + offset*7);
-    const from = monday.toISOString().slice(0,10);
+    const from = dateStr(monday);
     if(offset===0) return {from, to: todayStr()};
     const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
-    return {from, to: sunday.toISOString().slice(0,10)};
+    return {from, to: dateStr(sunday)};
   }
   const y = t.getFullYear(), m = t.getMonth() + offset;
   const first = new Date(y, m, 1);

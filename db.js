@@ -137,10 +137,14 @@ const DB = {
 
   async toggleExerciseDone(sessionDate, dayId, exerciseId, done) {
     const { data: existing } = await sb
-      .from("day_sessions").select("exercises")
+      .from("day_sessions").select("exercises, training_day_id")
       .eq("session_date", sessionDate).maybeSingle();
 
-    const exercises = { ...(existing?.exercises || {}) };
+    // Se a sessão do dia já existia para OUTRO dia de treino (usuário trocou de
+    // aba no mesmo dia), não herda os exercise_ids do dia anterior — senão eles
+    // ficam contados no anel de progresso do novo dia.
+    const sameDay = existing && existing.training_day_id === dayId;
+    const exercises = { ...(sameDay ? existing.exercises : {}) };
     if (done) exercises[exerciseId] = true; else delete exercises[exerciseId];
 
     const { error } = await sb.from("day_sessions").upsert({
