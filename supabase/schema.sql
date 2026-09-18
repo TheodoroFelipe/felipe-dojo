@@ -230,6 +230,63 @@ create policy "measurements_delete_own" on public.body_measurements
 
 
 -- ============================================================
+-- 8b. MEAL SLOTS (as 5 refeições do usuário — só título/jp editáveis,
+--     não dá pra criar/apagar refeição pelo client, só os itens dela)
+-- ============================================================
+create table public.meal_slots (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  title       text not null,
+  jp          text,
+  position    integer not null default 0,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index meal_slots_user_idx on public.meal_slots (user_id, position);
+
+alter table public.meal_slots enable row level security;
+
+create policy "meal_slots_select_own" on public.meal_slots
+  for select using (auth.uid() = user_id);
+create policy "meal_slots_update_own" on public.meal_slots
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Sem policy de insert/delete: as 5 linhas nascem via seed_default_meals()
+-- (trigger de signup / hard reset), o client só renomeia.
+
+
+-- ============================================================
+-- 8c. MEAL ITEMS (alimentos de cada refeição — totalmente editável,
+--     começa vazio: cada usuário registra o que realmente come)
+-- ============================================================
+create table public.meal_items (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  meal_slot_id uuid not null references public.meal_slots(id) on delete cascade,
+  name         text not null,
+  qty          text,
+  position     integer not null default 0,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+create index meal_items_slot_idx on public.meal_items (meal_slot_id, position);
+create index meal_items_user_idx on public.meal_items (user_id);
+
+alter table public.meal_items enable row level security;
+
+create policy "meal_items_select_own" on public.meal_items
+  for select using (auth.uid() = user_id);
+create policy "meal_items_insert_own" on public.meal_items
+  for insert with check (auth.uid() = user_id);
+create policy "meal_items_update_own" on public.meal_items
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "meal_items_delete_own" on public.meal_items
+  for delete using (auth.uid() = user_id);
+
+
+-- ============================================================
 -- 9. SEED da rotina padrão (usada no signup e no hard reset)
 -- ============================================================
 create or replace function public.seed_default_routine(p_user uuid)
@@ -281,6 +338,28 @@ $$;
 
 
 -- ============================================================
+-- 9b. SEED das 5 refeições padrão — só os títulos (café da manhã, almoço,
+--     pré/pós-treino, jantar, ceia), SEM alimentos. Cada usuário registra
+--     o que come de verdade pelo editor de dieta.
+-- ============================================================
+create or replace function public.seed_default_meals(p_user uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.meal_slots (user_id, title, jp, position) values
+    (p_user, 'CAFÉ DA MANHÃ',    '朝食',  1),
+    (p_user, 'ALMOÇO',           '昼食',  2),
+    (p_user, 'PRÉ / PÓS-TREINO', '運動食', 3),
+    (p_user, 'JANTAR',           '夕食',  4),
+    (p_user, 'CEIA',             '夜食',  5);
+end;
+$$;
+
+
+-- ============================================================
 -- 10. CRIAÇÃO AUTOMÁTICA DE PROFILE + ROTINA PADRÃO NO SIGNUP
 -- ============================================================
 -- Trigger em vez de upsert preguiçoso no client: garante que o profile e a
@@ -303,6 +382,7 @@ begin
   on conflict (user_id) do nothing;
 
   perform public.seed_default_routine(new.id);
+  perform public.seed_default_meals(new.id);
 
   return new;
 end;
@@ -557,6 +637,8 @@ begin
   delete from day_sessions      where user_id = v_user;
   delete from meal_days         where user_id = v_user;
   delete from body_measurements where user_id = v_user;
+  delete from meal_items         where user_id = v_user;
+  delete from meal_slots         where user_id = v_user;
   delete from training_exercises where user_id = v_user;
   delete from training_days      where user_id = v_user;
 
@@ -577,6 +659,7 @@ begin
    where user_id = v_user;
 
   perform public.seed_default_routine(v_user);
+  perform public.seed_default_meals(v_user);
 end;
 $$;
 
@@ -623,3 +706,42 @@ end;
 $$;
 
 grant execute on function public.rpc_reorder_training_exercises(uuid, uuid[]) to authenticated;
+
+
+-- 11h. Reordenar itens de uma refeição em lote
+create or replace function public.rpc_reorder_meal_items(p_slot_id uuid, p_ids uuid[])
+returns void
+language plpgsql
+security invoker
+as $$
+declare
+  v_user uuid := auth.uid();
+  v_id   uuid;
+  v_pos  int := 0;
+begin
+  foreach v_id in array p_ids loop
+    v_pos := v_pos + 1;
+    update meal_items set position = v_pos, updated_at = now()
+     where id = v_id and user_id = v_user and meal_slot_id = p_slot_id;
+  end loop;
+end;
+$$;
+
+grant execute on function public.rpc_reorder_meal_items(uuid, uuid[]) to authenticated;
+
+
+-- ============================================================
+-- 12. BACKFILL — contas criadas antes desta migração ainda não têm
+-- meal_slots (a tabela é nova). Roda uma vez, semeia as 5 refeições
+-- vazias só pra quem ainda não tem nenhuma linha.
+-- ============================================================
+do $$
+declare v_user uuid;
+begin
+  for v_user in
+    select p.user_id from public.profiles p
+     where not exists (select 1 from public.meal_slots m where m.user_id = p.user_id)
+  loop
+    perform public.seed_default_meals(v_user);
+  end loop;
+end $$;

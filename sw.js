@@ -3,7 +3,7 @@
  * Versão: bump CACHE_NAME para invalidar cache antigo após updates
  */
 
-const CACHE_NAME = "dojo-v2.0.4";
+const CACHE_NAME = "dojo-v2.1.0";
 const SHELL = [
   "./",
   "./index.html",

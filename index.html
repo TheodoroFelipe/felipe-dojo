@@ -589,10 +589,22 @@
       <div>
         <span class="card-jp">栄 養 計 画</span>
         <h2 class="card-title">PLANO ALIMENTAR</h2>
-        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px">Sem glúten · sem lactose · foco em performance</p>
+        <p style="font-size:12px;color:var(--ink-mute);margin-top:6px">Registre o que você come em cada refeição.</p>
       </div>
-      <button class="btn-secondary" id="resetMeals">🔄 ZERAR DIA</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" id="toggleMealEdit">✏ EDITAR DIETA</button>
+        <button class="btn-secondary" id="resetMeals">🔄 ZERAR DIA</button>
+      </div>
     </div>
+
+    <!-- Editor de dieta (título da refeição + itens) — visível só no modo edição -->
+    <div class="card hidden" id="mealEditor" style="margin-bottom:20px">
+      <div class="card-header">
+        <div><span class="card-jp">編 集</span><h3 class="card-title">EDITAR REFEIÇÕES</h3></div>
+      </div>
+      <div id="mealSlotEditList"></div>
+    </div>
+
     <div id="mealsList"></div>
   </section>
 
@@ -893,25 +905,6 @@
    por hydrateState(). A rotina padrão abaixo só existe como seed, no SQL
    (supabase/schema.sql, função seed_default_routine), não mais aqui. */
 
-const MEALS = [
-  { id:1, title:"CAFÉ DA MANHÃ", jp:"朝食", items:[
-    {name:"Ovos inteiros", qty:"2 unid"},{name:"Claras", qty:"3 unid"},{name:"Tapioca", qty:"80g"},{name:"Banana", qty:"1 unid"},{name:"Morangos / Mamão", qty:"1 porção"}
-  ]},
-  { id:2, title:"ALMOÇO", jp:"昼食", items:[
-    {name:"Arroz branco", qty:"150g"},{name:"Feijão", qty:"100g"},{name:"Peito de frango", qty:"180g"},{name:"Legumes cozidos", qty:"à vontade"},{name:"Salada crua", qty:"à vontade"}
-  ]},
-  { id:3, title:"PRÉ / PÓS-TREINO", jp:"運動食", options:[
-    { label:"Opção 1", items:[{name:"Arroz branco", qty:"150g"},{name:"Whey vegetal", qty:"30g"},{name:"Banana / Manga", qty:"1 unid"}]},
-    { label:"Opção 2", items:[{name:"Pão sem glúten", qty:"3 fatias"},{name:"Frango desfiado", qty:"100g"},{name:"Mel", qty:"1 colher"},{name:"Fruta", qty:"1 unid"}]}
-  ]},
-  { id:4, title:"JANTAR", jp:"夕食", items:[
-    {name:"Arroz branco", qty:"150g"},{name:"Tilápia / Frango", qty:"180-200g"},{name:"Legumes", qty:"à vontade"},{name:"Salada", qty:"à vontade"}
-  ]},
-  { id:5, title:"CEIA", jp:"夜食", items:[
-    {name:"Ovos inteiros", qty:"2 unid"},{name:"Claras", qty:"2 unid"},{name:"Fruta", qty:"1 unid"},{name:"Castanhas", qty:"10g"}
-  ]}
-];
-
 const ACHIEVEMENTS = [
   {id:"first_train", icon:"⛩", name:"PRIMEIRO PASSO",   desc:"Completou seu 1º treino",          check:s=>s.totalSessions>=1},
   {id:"first_meal",  icon:"🍙", name:"OMUSUBI",          desc:"Marcou sua 1ª refeição",           check:s=>s.totalMeals>=1},
@@ -1195,27 +1188,25 @@ document.getElementById('finishTraining').addEventListener('click', async ()=>{
   } catch(err){ toast("Erro ao encerrar treino", err.message || "Verifique sua conexão"); }
 });
 
-/* ============ DIETA ============ */
+/* ============ DIETA ============
+   As 5 refeições (S.mealSlots) são por usuário, vindas do Supabase —
+   título/jp e os itens de comida são todos editáveis pelo próprio usuário
+   (ver buildMealEditor). Nascem vazias no signup: cada um registra o que
+   realmente come, não vem nenhuma dieta pré-definida. */
 function buildMeals(){
   const list = document.getElementById('mealsList');
   const t = todayStr();
   if(!S.mealsByDay[t]) S.mealsByDay[t] = {};
   const meals = S.mealsByDay[t];
 
-  list.innerHTML = MEALS.map(m=>{
+  list.innerHTML = S.mealSlots.map((m,i)=>{
     const done = !!meals[m.id];
-    let body = "";
-    if(m.options){
-      const optKey = `${t}-${m.id}`;
-      const cur = S.mealOption[optKey] || "0";
-      body = `<div class="option-tabs">${m.options.map((o,i)=>`<button class="opt-btn ${cur==i?'active':''}" data-opt="${m.id}" data-i="${i}">${o.label}</button>`).join('')}</div>
-      <ul class="food-list">${m.options[cur].items.map(it=>`<li>${it.name}<span class="qty">${it.qty}</span></li>`).join('')}</ul>`;
-    } else {
-      body = `<ul class="food-list">${m.items.map(it=>`<li>${it.name}<span class="qty">${it.qty}</span></li>`).join('')}</ul>`;
-    }
+    const body = m.items.length
+      ? `<ul class="food-list">${m.items.map(it=>`<li>${it.name}${it.qty?`<span class="qty">${it.qty}</span>`:""}</li>`).join('')}</ul>`
+      : `<p style="color:var(--ink-mute);font-size:12px;padding:6px 0">Nenhum alimento cadastrado — use "Editar dieta" para adicionar.</p>`;
     return `<div class="meal ${done?'done':''}">
       <div class="meal-head">
-        <div class="meal-title"><span class="num">${m.id}</span>${m.title}<span class="meal-jp">${m.jp}</span></div>
+        <div class="meal-title"><span class="num">${i+1}</span>${m.title}<span class="meal-jp">${m.jp||''}</span></div>
         <button class="meal-toggle" data-meal="${m.id}">${done?"✓ FEITA":"MARCAR"}</button>
       </div>
       ${body}
@@ -1224,7 +1215,7 @@ function buildMeals(){
 
   list.querySelectorAll('[data-meal]').forEach(b=>{
     b.addEventListener('click', async e=>{
-      const id = +e.currentTarget.dataset.meal;
+      const id = e.currentTarget.dataset.meal;
       const wasDone = !!meals[id];
       try {
         const prevPerfectDays = S.perfectDays;
@@ -1239,15 +1230,6 @@ function buildMeals(){
       } catch(err){ toast("Erro ao salvar", err.message || "Verifique sua conexão"); }
     });
   });
-  list.querySelectorAll('[data-opt]').forEach(b=>{
-    b.addEventListener('click', async e=>{
-      const id = e.currentTarget.dataset.opt;
-      const i = e.currentTarget.dataset.i;
-      S.mealOption[`${t}-${id}`] = i;
-      buildMeals();
-      try { await DB.setMealOption(t, id, i); } catch(err){ /* campo de baixo risco, ignora falha */ }
-    });
-  });
 }
 
 document.getElementById('resetMeals').addEventListener('click', async ()=>{
@@ -1258,6 +1240,115 @@ document.getElementById('resetMeals').addEventListener('click', async ()=>{
     S.mealsByDay[t] = {};
     buildMeals(); buildHome();
   } catch(err){ toast("Erro ao zerar", err.message || "Verifique sua conexão"); }
+});
+
+/* ============ DIETA — EDIÇÃO ============ */
+function findMealItem(itemId){
+  for(const slot of S.mealSlots){
+    const item = slot.items.find(it=>it.id===itemId);
+    if(item) return { slot, item };
+  }
+  return {};
+}
+
+function buildMealEditor(){
+  const wrap = document.getElementById('mealSlotEditList');
+  wrap.innerHTML = S.mealSlots.map(slot=>`
+    <div class="card" style="margin-bottom:16px;padding:16px">
+      <div style="margin-bottom:10px">
+        <span class="card-jp">${slot.jp||''}</span>
+        <input type="text" class="load-input" style="width:100%;text-align:left;font-weight:700" value="${slot.title.replace(/"/g,'&quot;')}" data-slot-rename="${slot.id}">
+      </div>
+      ${slot.items.map((it,i)=>`
+        <div class="exercise" style="grid-template-columns:auto 1fr 90px auto;padding:6px 0">
+          <div style="display:flex;gap:6px">
+            <button class="check-btn" data-item-up="${it.id}" ${i===0?'disabled':''}>↑</button>
+            <button class="check-btn" data-item-down="${it.id}" ${i===slot.items.length-1?'disabled':''}>↓</button>
+          </div>
+          <input type="text" class="load-input" style="width:100%;text-align:left" value="${it.name.replace(/"/g,'&quot;')}" data-item-rename="${it.id}">
+          <input type="text" class="load-input" placeholder="qtd" value="${(it.qty||'').replace(/"/g,'&quot;')}" data-item-qty="${it.id}">
+          <button class="btn-danger" data-item-del="${it.id}">✕</button>
+        </div>`).join('') || `<p style="color:var(--ink-mute);font-size:12px;padding:8px 0">Nenhum item ainda.</p>`}
+      <div class="btn-row" style="margin-top:10px"><button class="btn-secondary" data-add-item="${slot.id}">+ NOVO ITEM</button></div>
+    </div>`).join('');
+
+  wrap.querySelectorAll('[data-slot-rename]').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const id = e.target.dataset.slotRename;
+      const title = e.target.value.trim() || 'REFEIÇÃO';
+      const slot = S.mealSlots.find(s=>s.id===id);
+      slot.title = title;
+      try { await DB.renameMealSlot(id, title, slot.jp); buildMeals(); }
+      catch(err){ toast("Erro ao renomear refeição", err.message || "Verifique sua conexão"); }
+    });
+  });
+  wrap.querySelectorAll('[data-item-rename]').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const id = e.target.dataset.itemRename;
+      const { item } = findMealItem(id);
+      const name = e.target.value.trim() || 'Item';
+      item.name = name;
+      try { await DB.renameMealItem(id, name, item.qty); buildMeals(); }
+      catch(err){ toast("Erro ao renomear item", err.message || "Verifique sua conexão"); }
+    });
+  });
+  wrap.querySelectorAll('[data-item-qty]').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const id = e.target.dataset.itemQty;
+      const { item } = findMealItem(id);
+      const qty = e.target.value.trim();
+      item.qty = qty;
+      try { await DB.renameMealItem(id, item.name, qty); buildMeals(); }
+      catch(err){ toast("Erro ao salvar quantidade", err.message || "Verifique sua conexão"); }
+    });
+  });
+  wrap.querySelectorAll('[data-item-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!confirm("Remover este item?")) return;
+      const id = btn.dataset.itemDel;
+      const { slot } = findMealItem(id);
+      try {
+        await DB.deleteMealItem(id);
+        slot.items = slot.items.filter(it=>it.id!==id);
+        buildMealEditor(); buildMeals();
+      } catch(err){ toast("Erro ao remover item", err.message || "Verifique sua conexão"); }
+    });
+  });
+  wrap.querySelectorAll('[data-item-up],[data-item-down]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.itemUp || btn.dataset.itemDown;
+      const { slot } = findMealItem(id);
+      const idx = slot.items.findIndex(it=>it.id===id);
+      const swapIdx = idx + (btn.dataset.itemUp ? -1 : 1);
+      if(swapIdx<0 || swapIdx>=slot.items.length) return;
+      [slot.items[idx], slot.items[swapIdx]] = [slot.items[swapIdx], slot.items[idx]];
+      buildMealEditor(); buildMeals();
+      try { await DB.reorderMealItems(slot.id, slot.items.map(it=>it.id)); }
+      catch(err){ toast("Erro ao reordenar", err.message || "Verifique sua conexão"); }
+    });
+  });
+  wrap.querySelectorAll('[data-add-item]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const slotId = btn.dataset.addItem;
+      const name = prompt("Nome do alimento:");
+      if(!name || !name.trim()) return;
+      const qty = prompt("Quantidade (opcional):") || "";
+      const slot = S.mealSlots.find(s=>s.id===slotId);
+      try {
+        const item = await DB.createMealItem(slotId, name.trim(), qty.trim(), slot.items.length+1);
+        slot.items.push({ id: item.id, name: item.name, qty: item.qty });
+        buildMealEditor(); buildMeals();
+      } catch(err){ toast("Erro ao adicionar item", err.message || "Verifique sua conexão"); }
+    });
+  });
+}
+
+document.getElementById('toggleMealEdit').addEventListener('click', ()=>{
+  const editor = document.getElementById('mealEditor');
+  const willShow = editor.classList.contains('hidden');
+  editor.classList.toggle('hidden');
+  document.getElementById('toggleMealEdit').textContent = willShow ? '✓ CONCLUIR EDIÇÃO' : '✏ EDITAR DIETA';
+  if(willShow) buildMealEditor();
 });
 
 /* ============ EVOLUÇÃO ============ */

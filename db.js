@@ -28,6 +28,8 @@ async function hydrateState() {
     sessionsRes,
     mealDaysRes,
     historyRes,
+    mealSlotsRes,
+    mealItemsRes,
   ] = await Promise.all([
     sb.from("profiles").select("*").single(),
     sb.from("training_days").select("*").is("archived_at", null).order("position"),
@@ -40,9 +42,11 @@ async function hydrateState() {
     sb.from("day_sessions").select("*"),
     sb.from("meal_days").select("*"),
     sb.from("body_measurements").select("*").order("measured_on"),
+    sb.from("meal_slots").select("*").order("position"),
+    sb.from("meal_items").select("*").order("position"),
   ]);
 
-  for (const r of [profileRes, daysRes, exercisesRes, prsRes, loadsRes, sessionsRes, mealDaysRes, historyRes]) {
+  for (const r of [profileRes, daysRes, exercisesRes, prsRes, loadsRes, sessionsRes, mealDaysRes, historyRes, mealSlotsRes, mealItemsRes]) {
     if (r.error) throw r.error;
   }
 
@@ -101,9 +105,19 @@ async function hydrateState() {
     thigh: row.thigh != null ? Number(row.thigh) : null,
   }));
 
+  const itemsBySlot = {};
+  for (const row of mealItemsRes.data || []) {
+    (itemsBySlot[row.meal_slot_id] = itemsBySlot[row.meal_slot_id] || [])
+      .push({ id: row.id, name: row.name, qty: row.qty });
+  }
+  const mealSlots = (mealSlotsRes.data || []).map((row) => ({
+    id: row.id, title: row.title, jp: row.jp,
+    items: itemsBySlot[row.id] || [],
+  }));
+
   return {
     PRs, loads, daySessions, mealsByDay, mealOption, history,
-    trainingDays, exerciseNames,
+    trainingDays, exerciseNames, mealSlots,
     selectedDayId: profile.selected_day_id || (trainingDays[0] && trainingDays[0].id) || null,
     totalSessions: profile.total_sessions,
     totalMeals: profile.total_meals,
@@ -264,6 +278,33 @@ const DB = {
   },
   async reorderExercises(dayId, orderedIds) {
     const { error } = await sb.rpc("rpc_reorder_training_exercises", { p_day_id: dayId, p_ids: orderedIds });
+    if (error) throw error;
+  },
+
+  // ---- Dieta (CRUD dos itens de cada refeição; as 5 refeições em si só
+  // podem ser renomeadas — criar/apagar refeição não passa pelo client) ----
+  async renameMealSlot(slotId, title, jp) {
+    const { error } = await sb.from("meal_slots").update({ title, jp }).eq("id", slotId);
+    if (error) throw error;
+  },
+  async createMealItem(slotId, name, qty, position) {
+    const { data: user } = await sb.auth.getUser();
+    const { data, error } = await sb.from("meal_items")
+      .insert({ user_id: user.user.id, meal_slot_id: slotId, name, qty: qty || null, position })
+      .select().single();
+    if (error) throw error;
+    return data;
+  },
+  async renameMealItem(itemId, name, qty) {
+    const { error } = await sb.from("meal_items").update({ name, qty: qty || null }).eq("id", itemId);
+    if (error) throw error;
+  },
+  async deleteMealItem(itemId) {
+    const { error } = await sb.from("meal_items").delete().eq("id", itemId);
+    if (error) throw error;
+  },
+  async reorderMealItems(slotId, orderedIds) {
+    const { error } = await sb.rpc("rpc_reorder_meal_items", { p_slot_id: slotId, p_ids: orderedIds });
     if (error) throw error;
   },
 
