@@ -965,6 +965,26 @@ function todayStr(){ return dateStr(new Date()); }
 function fmtDate(s){ const d=new Date(s+"T12:00:00"); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
 function fmtDateLong(s){ const d=new Date(s+"T12:00:00"); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}); }
 
+// Segunda-feira da semana atual (posição 0 da rotina = segunda, ver
+// syncSelectedDayToWeekday). Usado para resolver a data real de cada aba
+// de treino, em vez de sempre gravar/ler a sessão do dia sob "hoje".
+function weekMonday(){
+  const d = new Date(); d.setDate(d.getDate() - ((d.getDay()+6)%7));
+  return d;
+}
+// Data da sessão para uma aba de treino: se a posição dela na rotina já
+// passou (ou é hoje) nesta semana, usa a data real daquele dia — assim o
+// treino encerrado continua aparecendo quando você reabre a aba depois.
+// Se a posição ainda não chegou (dia futuro da semana), usa hoje, para
+// manter o caso de "trocar de treino no mesmo dia" funcionando.
+function sessionDateForDay(dayId){
+  const idx = S.trainingDays.findIndex(d=>d.id===dayId);
+  if(idx<0) return todayStr();
+  const dt = weekMonday(); dt.setDate(dt.getDate()+idx);
+  const resolved = dateStr(dt);
+  return resolved > todayStr() ? todayStr() : resolved;
+}
+
 /* ============ TOASTS ============ */
 function toast(title, desc, kind="default"){
   const stack = document.getElementById('toasts');
@@ -1072,7 +1092,7 @@ function buildDayTabs(){
   S.trainingDays.forEach((d,i)=>{
     const b = document.createElement('button');
     b.className = 'day-tab' + (S.selectedDayId===d.id ? ' active' : '');
-    const t = todayStr();
+    const t = sessionDateForDay(d.id);
     const session = S.daySessions[t];
     if(session && session.dayId===d.id && session.finished) b.classList.add('done');
     b.innerHTML = `<span class="jp">${d.jp||''}・DIA</span><span class="num">${i+1}</span>`;
@@ -1093,7 +1113,7 @@ function buildExercises(){
     updateRing();
     return;
   }
-  const t = todayStr();
+  const t = sessionDateForDay(day.id);
   if(!S.daySessions[t] || S.daySessions[t].dayId !== day.id){
     S.daySessions[t] = { dayId: day.id, exercises:{}, finished:false };
   }
@@ -1130,10 +1150,10 @@ function buildExercises(){
       const v = parseFloat(e.target.value);
       if(isNaN(v) || v<=0) return;
       try {
-        const isPR = await DB.upsertLoad(exId, v, todayStr());
+        const isPR = await DB.upsertLoad(exId, v, t);
         S.loads[exId] = v;
         if(isPR){
-          S.PRs[exId] = { weight:v, date: todayStr() };
+          S.PRs[exId] = { weight:v, date: t };
           applyProfile(await refreshProfile());
           toast("PR! "+exerciseName(exId), `Novo recorde: ${v} kg (+25 XP)`, "pr");
         }
@@ -1155,7 +1175,7 @@ function buildExercises(){
 }
 
 function updateRing(){
-  const t = todayStr();
+  const t = sessionDateForDay(S.selectedDayId);
   const session = S.daySessions[t];
   const day = S.trainingDays.find(x=>x.id===(session?.dayId || S.selectedDayId));
   const total = day ? day.exercises.length : 0;
@@ -1167,7 +1187,7 @@ function updateRing(){
 }
 
 document.getElementById('finishTraining').addEventListener('click', async ()=>{
-  const t = todayStr();
+  const t = sessionDateForDay(S.selectedDayId);
   const session = S.daySessions[t];
   if(!session){ toast("Sem sessão", "Marque exercícios primeiro."); return; }
   const day = S.trainingDays.find(x=>x.id===session.dayId);
@@ -1176,8 +1196,8 @@ document.getElementById('finishTraining').addEventListener('click', async ()=>{
   if(done < total){
     if(!confirm(`Você completou ${done}/${total}. Encerrar mesmo assim?`)) return;
   }
-  if(session.finished){ toast("Já encerrado","Esse treino já foi encerrado hoje."); return;}
-  const yest = new Date(); yest.setDate(yest.getDate()-1);
+  if(session.finished){ toast("Já encerrado","Esse treino já foi encerrado."); return;}
+  const yest = new Date(t+"T12:00:00"); yest.setDate(yest.getDate()-1);
   const ys = dateStr(yest);
   try {
     const profile = await DB.finishTraining(t, ys);
